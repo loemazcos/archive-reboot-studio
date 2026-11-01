@@ -205,13 +205,31 @@ export function NeisApp() {
 }
 
 /* ---------------- 무신사 / 에이블리 ---------------- */
+function ProductDetail({ shop, name, price, note, onBack }: { shop: string; name: string; price: string; note?: string; onBack: () => void }) {
+  const [liked, setLiked] = useState(true);
+  return (
+    <Detail title={shop} onBack={onBack}>
+      <b>{name}</b>
+      {'\n'}
+      {price}
+      {note ? `\n\n${note}` : ''}
+      {'\n\n'}
+      <button type="button" onClick={() => setLiked(!liked)} className="rounded-full bg-[var(--card)] px-4 py-2 text-[14px] font-semibold">
+        {liked ? '♥ 찜 해제' : '♡ 찜하기'}
+      </button>
+    </Detail>
+  );
+}
+
 export function ShopAApp() {
+  const [open, setOpen] = useState<(typeof shopA)[number] | null>(null);
+  if (open) return <ProductDetail shop="무신사" name={open.name} price={open.price} note={open.note} onBack={() => setOpen(null)} />;
   return (
     <AppShell title="무신사">
       {(['장바구니', '최근 본 상품', '좋아요'] as const).map((tag) => (
         <Group key={tag} label={tag}>
           {shopA.filter((item) => item.tag === tag).map((item) => (
-            <Row key={item.id} title={item.name} sub={item.note} right={item.price} />
+            <Row key={item.id} title={item.name} sub={item.note} right={item.price} onClick={() => setOpen(item)} />
           ))}
         </Group>
       ))}
@@ -220,10 +238,12 @@ export function ShopAApp() {
 }
 
 export function ShopBApp() {
+  const [open, setOpen] = useState<(typeof shopB)[number] | null>(null);
+  if (open) return <ProductDetail shop="에이블리" name={open.name} price={open.price} onBack={() => setOpen(null)} />;
   return (
     <AppShell title="에이블리">
       <Group label="찜한 상품">
-        {shopB.map((item) => <Row key={item.id} title={item.name} right={item.price} />)}
+        {shopB.map((item) => <Row key={item.id} title={item.name} right={item.price} onClick={() => setOpen(item)} />)}
       </Group>
     </AppShell>
   );
