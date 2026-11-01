@@ -20,7 +20,7 @@ export default function RemitApp() {
       <p className="text-[26px] font-bold leading-[1.2]">토스</p>
       <section className="mt-6 flex flex-col gap-4 rounded-[24px] bg-[#F2F4F6] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--key-pressed)]">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white">
             <Wallet size={18} strokeWidth={1.8} aria-hidden="true" />
           </span>
           <div>
