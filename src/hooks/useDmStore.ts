@@ -132,7 +132,6 @@ export function useDmStore(now: number) {
   }
 
   return {
-    rowsFor,
     status,
     rows,
     pendingId,
