@@ -14,13 +14,186 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      calendar_events: {
+        Row: {
+          created_at: string
+          device_id: string
+          end_time: string | null
+          event_date: string
+          id: string
+          kind: string
+          memo: string | null
+          place: string | null
+          start_time: string | null
+          status: string
+          status_note: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          end_time?: string | null
+          event_date: string
+          id?: string
+          kind: string
+          memo?: string | null
+          place?: string | null
+          start_time?: string | null
+          status?: string
+          status_note?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          end_time?: string | null
+          event_date?: string
+          id?: string
+          kind?: string
+          memo?: string | null
+          place?: string | null
+          start_time?: string | null
+          status?: string
+          status_note?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      clue_discoveries: {
+        Row: {
+          clue_id: string
+          device_id: string
+          discovered_at: string
+          id: number
+        }
+        Insert: {
+          clue_id: string
+          device_id: string
+          discovered_at?: string
+          id?: never
+        }
+        Update: {
+          clue_id?: string
+          device_id?: string
+          discovered_at?: string
+          id?: never
+        }
+        Relationships: []
+      }
+      dm_messages: {
+        Row: {
+          body: string
+          created_at: string
+          deliver_at: number
+          device_id: string
+          id: number
+          read_at: number | null
+          sender: string
+          status: string
+          thread_id: string
+          typing_cycles: number
+          unsend_after_min: number | null
+          unsent_at: number | null
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          deliver_at?: number
+          device_id: string
+          id?: never
+          read_at?: number | null
+          sender: string
+          status?: string
+          thread_id: string
+          typing_cycles?: number
+          unsend_after_min?: number | null
+          unsent_at?: number | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          deliver_at?: number
+          device_id?: string
+          id?: never
+          read_at?: number | null
+          sender?: string
+          status?: string
+          thread_id?: string
+          typing_cycles?: number
+          unsend_after_min?: number | null
+          unsent_at?: number | null
+        }
+        Relationships: []
+      }
+      game_state: {
+        Row: {
+          codex: Json
+          device_id: string
+          run: Json
+          updated_at: string
+        }
+        Insert: {
+          codex?: Json
+          device_id: string
+          run?: Json
+          updated_at?: string
+        }
+        Update: {
+          codex?: Json
+          device_id?: string
+          run?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rate_limits: {
+        Row: {
+          count: number
+          device_id: string
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          device_id: string
+          window_start: string
+        }
+        Update: {
+          count?: number
+          device_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      save_slots: {
+        Row: {
+          created_at: string
+          device_id: string
+          name: string
+          pin_hash: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          name: string
+          pin_hash: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          name?: string
+          pin_hash?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      consume_rate_limit: {
+        Args: { p_key: string; p_limit: number; p_window: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
