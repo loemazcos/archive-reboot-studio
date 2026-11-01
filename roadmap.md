@@ -24,7 +24,7 @@
 ## Nov 1 batch
 - [x] Notification Center: lock = from bottom, home = from top
 - [x] Kakao chat: no fallback to scripted lines mid-conversation; auto-scroll to newest
-- [x] Size/spacing mismatches across apps
+- [ ] Size/spacing mismatches across apps
 - [x] Toss transparent areas filled white
 - [x] Spotify app (done; real album photos — waiting on user): '보넥도 사랑 노래 모음' 5 tracks, play/pause with animated bars
 - [x] Camera shutter + Photos with conditional clue photos (on capture / story event)
