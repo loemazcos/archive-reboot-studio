@@ -51,8 +51,8 @@ export const BLOCKED_REPLY = '그런 얘기는 안 해';
 
 // AI가 답장에서 공개해도 되는 단서 ID 목록입니다. 아직 정하지 않아 비어 있습니다.
 export const REVEALABLE_CLUES: Record<string, string[]> = {
-  sanghyuk: [],
-  donghyun: [],
-  jaehyun: [],
-  seongho: [],
+  sanghyuk: ['C01', 'C02', 'C03', 'C04', 'C05', 'C14', 'C15', 'C18', 'C19', 'C23', 'C24'],
+  donghyun: ['C09', 'C10', 'C11', 'C12'],
+  jaehyun: ['C07', 'C08', 'C11', 'C12', 'C13'],
+  seongho: ['C06', 'C07', 'C08', 'C21'],
 };
