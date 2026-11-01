@@ -17,6 +17,7 @@
 - Vite + React frontend
 - Chat-style interaction interface (inferred from personas.ts chat reveal mechanic)
 - Clue discovery triggers gate character dialogue reveals
+- Includes fake social media / account screens (e.g., 대전 계정, 인스타 게시물 댓글) for clue discovery
 
 ## Decisions, constraints & rationale
 
@@ -25,11 +26,15 @@
 - Story guide is authoritative source for clue descriptions and core flags; `clues.js` must match it
 - C02 needs `core` flag set to match guide
 - Framework: vite-react
+- **Build verified passing** (dependency issues resolved)
+- **Clue triggers connected**: C01~C06, C09~C24 now discoverable in-game (22 of 24)
+- C07 and C08 still have no in-game discovery trigger
+- User assignment scope was C02–C05; C07/C08 outside that scope and intentionally left
 
 ## Open questions & assumptions
 
-- **Missing triggers**: C01, C02, C03, C05, C07, C08, C09, C10 have no in-game discovery trigger — characters can never reveal them; trigger implementation needed
+- **Missing triggers (C07, C08)**: C07 (대전 계정의 제보 답장) and C08 (학생회 계정 댓글) still have no in-game discovery path
+  - Proposed: C07 → 대전 계정 화면, C08 → 인스타 게시물 댓글 — awaiting user confirmation
 - **clues.js vs story guide**: descriptions still mismatched; needs reconciliation
-- **Build status**: final build not verified; earlier dependency installation failed in environment
 - Need to confirm whether all 24 clues are player-discoverable before final build
 - Assumption: `REVEALABLE_CLUES` structure maps clue IDs to character dialogue unlock conditions
