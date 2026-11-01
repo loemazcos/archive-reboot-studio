@@ -4,7 +4,7 @@ import { useReportScreen } from '@/components/phone/ScreenReport';
 import Avatar from '@/components/apps/Avatar';
 import SanghyukChat from '@/components/apps/instagram/SanghyukChat';
 import { useDmStore } from '@/hooks/useDmStore';
-import { requestDmCallback, type DmCallbackKey, type DmMessage, type DmThread } from '@/lib/dmChat';
+import { requestDmCallback, rowToMessage, type DmCallbackKey, type DmMessage, type DmThread } from '@/lib/dmChat';
 import { playSound } from '@/lib/sound';
 import { useGameState } from '@/state/GameState';
 import { openConsult, type ConsultRoom } from '@/state/consults';
@@ -110,10 +110,25 @@ export default function InstagramDm({ initialThreadId }: Props) {
   }, []);
 
   if (active?.id === 'sanghyuk') {
-    return <SanghyukChat thread={active} onBack={() => {
+    const live = store.rowsFor('sanghyuk').map((row) => rowToMessage(row, active.name));
+    return (
+      <SanghyukChat
+        thread={active}
+        live={live}
+        typing={store.typingId === active.id}
+        notice={store.notice?.threadId === active.id ? store.notice.text : null}
+        onSend={(text) =>
+          void store.send(active, text, {
+            onSent: () => update((current) => sendDm(current, active.id)),
+            onReply: (reply) => update((current) => applyDmEffects(current, reply.effects)),
+          })
+        }
+        onBack={() => {
           setActiveId(null);
           update(leaveThread);
-        }} />;
+        }}
+      />
+    );
   }
 
   if (active) {
