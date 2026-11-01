@@ -1,24 +1,28 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, ClientOnly } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+const GameApp = lazy(() => import("@/components/GameApp"));
+
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "태산의 폰 — 인터랙티브 스토리 게임" },
+      { name: "description", content: "한 소년의 휴대폰 속 단서를 따라가는 인터랙티브 로맨스 미스터리 게임." },
+      { property: "og:title", content: "태산의 폰 — 인터랙티브 스토리 게임" },
+      { property: "og:description", content: "한 소년의 휴대폰 속 단서를 따라가는 인터랙티브 로맨스 미스터리 게임." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <ClientOnly fallback={<div className="game-loading" />}>
+      <Suspense fallback={<div className="game-loading" />}>
+        <GameApp />
+      </Suspense>
+    </ClientOnly>
   );
 }

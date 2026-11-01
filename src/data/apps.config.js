@@ -1,0 +1,25 @@
+export const dockIds = ['phone', 'message', 'kakao', 'insta'];
+
+export const apps = [
+  { id: 'insta', name: '인스타', image: 'insta', icon: 'camera', colors: ['#FBC17D', '#E0457B'], ink: '#ffffff' },
+  { id: 'kakao', name: '카톡', image: 'kakao', icon: 'message', colors: ['#FFE58A', '#F5C100'], ink: '#1c1c1e' },
+  { id: 'phone', name: '전화', image: 'phone', icon: 'phone', colors: ['#7EE19A', '#27B255'], ink: '#ffffff' },
+  { id: 'message', name: '메시지', image: 'message', icon: 'sms', colors: ['#8FD0FF', '#2F8FF0'], ink: '#ffffff' },
+  { id: 'neis', name: '나이스플러스', image: 'neis', icon: 'graduation', colors: ['#B5EAD7', '#2E9E7A'], ink: '#ffffff' },
+  { id: 'shopA', name: '무신사', image: 'shopA', icon: 'bag', colors: ['#5B5B63', '#2C2C30'], ink: '#ffffff' },
+  { id: 'shopB', name: '에이블리', image: 'shopB', icon: 'shirt', colors: ['#F9C6D2', '#E06A8A'], ink: '#ffffff' },
+  { id: 'market', name: '당근', image: 'market', icon: 'tag', colors: ['#FFD9A0', '#F59E0B'], ink: '#1c1c1e' },
+  { id: 'remit', name: '토스', image: 'remit', icon: 'wallet', colors: ['#9BEBCB', '#17A67A'], ink: '#ffffff' },
+  { id: 'music', name: '스포티파이', image: 'music', icon: 'music', colors: ['#FF9BAD', '#E63956'], ink: '#ffffff' },
+  { id: 'video', name: '사진', image: 'video', icon: 'play', colors: ['#FFA6A6', '#E03E3E'], ink: '#ffffff' },
+  { id: 'memo', name: '메모', image: 'memo', icon: 'note', colors: ['#FFF4A8', '#F2C230'], ink: '#1c1c1e' },
+  { id: 'clueBook', name: '단서 도감', icon: 'book', colors: ['#D4E4F7', '#5B7FA6'], ink: '#ffffff' },
+  { id: 'calendar', name: '캘린더', image: 'calendar', icon: 'calendar', colors: ['#FFFFFF', '#E4E4EA'], ink: '#e5484d' },
+  { id: 'clock', name: '시계', image: 'clock', icon: 'clock', colors: ['#3A3A3F', '#111114'], ink: '#ffffff' },
+  { id: 'browser', name: '사파리', image: 'browser', icon: 'compass', colors: ['#A6DCFF', '#1E88E5'], ink: '#ffffff' },
+  { id: 'health', name: '건강', image: 'health', icon: 'footprints', colors: ['#C1F5B0', '#34C759'], ink: '#1c1c1e' },
+  { id: 'map', name: '지도', image: 'map', icon: 'map', colors: ['#C7EBB6', '#4CAF50'], ink: '#1c1c1e' },
+  { id: 'settings', name: '설정', image: 'settings', icon: 'settings', colors: ['#D6D8DE', '#8E8E93'], ink: '#1c1c1e' },
+  { id: 'calc', name: '계산기', image: 'calc', icon: 'calc', colors: ['#505057', '#2C2C30'], ink: '#ffffff' },
+  { id: 'camera', name: '카메라', image: 'camera', icon: 'aperture', colors: ['#E4E5EA', '#A9ABB3'], ink: '#1c1c1e' },
+];
