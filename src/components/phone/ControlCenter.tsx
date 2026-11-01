@@ -1,4 +1,4 @@
-import { useState, type ComponentType, type ReactNode } from 'react';
+import { useState, type ComponentType, type ReactNode } from "react";
 import {
   Bluetooth,
   BatteryLow,
@@ -17,22 +17,22 @@ import {
   Volume2,
   Wifi,
   type LucideProps,
-} from 'lucide-react';
+} from "lucide-react";
 
 type Icon = ComponentType<LucideProps>;
 
 const CONNECTIVITY: { id: string; label: string; icon: Icon; on: boolean }[] = [
-  { id: 'wifi', label: '와이파이', icon: Wifi, on: true },
-  { id: 'data', label: '데이터', icon: Signal, on: true },
-  { id: 'plane', label: '비행기', icon: Plane, on: false },
-  { id: 'bluetooth', label: '블루투스', icon: Bluetooth, on: true },
+  { id: "wifi", label: "와이파이", icon: Wifi, on: true },
+  { id: "data", label: "데이터", icon: Signal, on: true },
+  { id: "plane", label: "비행기", icon: Plane, on: false },
+  { id: "bluetooth", label: "블루투스", icon: Bluetooth, on: true },
 ];
 
 const ROUND_TOOLS: { id: string; label: string; icon: Icon; on: boolean }[] = [
-  { id: 'flashlight', label: '손전등', icon: Flashlight, on: false },
-  { id: 'timer', label: '타이머', icon: Timer, on: false },
-  { id: 'calc', label: '계산기', icon: Calculator, on: false },
-  { id: 'camera', label: '카메라', icon: Camera, on: false },
+  { id: "flashlight", label: "손전등", icon: Flashlight, on: false },
+  { id: "timer", label: "타이머", icon: Timer, on: false },
+  { id: "calc", label: "계산기", icon: Calculator, on: false },
+  { id: "camera", label: "카메라", icon: Camera, on: false },
 ];
 
 type Props = {
@@ -46,9 +46,18 @@ type Props = {
   onToggleLowPower: () => void;
 };
 
-export default function ControlCenter({ progress, dragging, onClose, dnd, onToggleDnd, onCapture, lowPower, onToggleLowPower }: Props) {
+export default function ControlCenter({
+  progress,
+  dragging,
+  onClose,
+  dnd,
+  onToggleDnd,
+  onCapture,
+  lowPower,
+  onToggleLowPower,
+}: Props) {
   const [on, setOn] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries([...CONNECTIVITY, ...ROUND_TOOLS].map((item) => [item.id, item.on]))
+    Object.fromEntries([...CONNECTIVITY, ...ROUND_TOOLS].map((item) => [item.id, item.on])),
   );
   const [rotationLock, setRotationLock] = useState(true);
   const [brightness, setBrightness] = useState(70);
@@ -60,13 +69,17 @@ export default function ControlCenter({ progress, dragging, onClose, dnd, onTogg
   }
 
   return (
-    <div className={`absolute inset-0 z-40 ${hidden ? 'invisible' : ''}`}>
-      <div className="absolute inset-0 bg-black/30" style={{ opacity: progress }} onClick={onClose} />
+    <div className={`absolute inset-0 z-40 ${hidden ? "invisible" : ""}`}>
+      <div
+        className="absolute inset-0 bg-black/30"
+        style={{ opacity: progress }}
+        onClick={onClose}
+      />
       <section
         className="absolute inset-x-0 top-0 flex h-[92%] flex-col gap-3 rounded-b-[32px] bg-[var(--glass)] px-4 pb-6 pt-[calc(env(safe-area-inset-top)+64px)] shadow-[0_12px_40px_rgba(0,0,0,0.2)] backdrop-blur-[24px] backdrop-saturate-[180%]"
         style={{
           transform: `translate3d(0, ${(progress - 1) * 100}%, 0)`,
-          transition: dragging ? 'none' : 'transform 450ms var(--spring)',
+          transition: dragging ? "none" : "transform 450ms var(--spring)",
         }}
       >
         <div className="grid grid-cols-2 gap-3">
@@ -84,12 +97,16 @@ export default function ControlCenter({ progress, dragging, onClose, dnd, onTogg
               onClick={onToggleDnd}
               className="flex flex-1 items-center gap-3 rounded-[22px] bg-[var(--card)] p-4 text-left transition-transform active:scale-[0.98]"
             >
-              <span className={`flex h-10 w-10 items-center justify-center rounded-full ${dnd ? 'bg-[var(--accent)] text-white' : 'bg-[var(--key-pressed)] text-[var(--fg)]'}`}>
+              <span
+                className={`flex h-10 w-10 items-center justify-center rounded-full ${dnd ? "bg-[var(--accent)] text-white" : "bg-[var(--key-pressed)] text-[var(--fg)]"}`}
+              >
                 <Moon size={20} strokeWidth={1.8} aria-hidden="true" />
               </span>
               <span>
                 <span className="block text-[15px] font-semibold">방해금지</span>
-                <span className="block text-[12px] text-[var(--fg-2)]">{dnd ? '켜짐' : '꺼짐'}</span>
+                <span className="block text-[12px] text-[var(--fg-2)]">
+                  {dnd ? "켜짐" : "꺼짐"}
+                </span>
               </span>
             </button>
             <button
@@ -137,9 +154,15 @@ export default function ControlCenter({ progress, dragging, onClose, dnd, onTogg
           </span>
           <span className="flex-1">
             <span className="block text-[14px] font-semibold">재생 중인 곡 없음</span>
-            <span className="block text-[12px] text-[var(--fg-2)]">스포티파이 앱에서 재생하면 여기 보여요</span>
+            <span className="block text-[12px] text-[var(--fg-2)]">
+              스포티파이 앱에서 재생하면 여기 보여요
+            </span>
           </span>
-          <button type="button" aria-label="재생" className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--key)]">
+          <button
+            type="button"
+            aria-label="재생"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--key)]"
+          >
             <Play size={16} strokeWidth={1.8} aria-hidden="true" />
           </button>
         </div>
@@ -189,13 +212,13 @@ function ToggleButton({ label, active, onClick, wide = false, children }: Toggle
       aria-label={label}
       onClick={onClick}
       className={`flex items-center text-[12px] transition-transform active:scale-95 ${
-        wide ? 'gap-3 rounded-[22px] bg-[var(--card)] p-3 text-[14px]' : 'flex-col gap-1.5'
+        wide ? "gap-3 rounded-[22px] bg-[var(--card)] p-3 text-[14px]" : "flex-col gap-1.5"
       }`}
     >
       <span
         className={`flex items-center justify-center rounded-full transition-colors ${
-          wide ? 'h-10 w-10' : 'h-[52px] w-[52px]'
-        } ${active ? 'bg-[var(--accent)] text-white' : 'bg-[var(--card)] text-[var(--fg)]'}`}
+          wide ? "h-10 w-10" : "h-[52px] w-[52px]"
+        } ${active ? "bg-[var(--accent)] text-white" : "bg-[var(--card)] text-[var(--fg)]"}`}
       >
         {children}
       </span>

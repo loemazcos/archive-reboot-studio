@@ -1,9 +1,9 @@
-import { Camera } from 'lucide-react';
-import NotificationItem from '@/components/phone/NotificationItem';
-import { formatClock, formatLockDate } from '@/lib/gameTime';
-import { useVisibleNotices } from '@/hooks/useVisibleNotices';
-import { useGameState } from '@/state/GameState';
-import { clearNotifications } from '@/state/runState';
+import { Camera } from "lucide-react";
+import NotificationItem from "@/components/phone/NotificationItem";
+import { formatClock, formatLockDate } from "@/lib/gameTime";
+import { useVisibleNotices } from "@/hooks/useVisibleNotices";
+import { useGameState } from "@/state/GameState";
+import { clearNotifications } from "@/state/runState";
 
 type Props = {
   progress: number;
@@ -12,27 +12,38 @@ type Props = {
   onClose: () => void;
   onCapture?: () => void;
   /** 'top' = home screen (pulls down), 'bottom' = lock screen (slides up). */
-  from?: 'top' | 'bottom';
+  from?: "top" | "bottom";
 };
 
-export default function NotificationCenter({ progress, dragging, now, onClose, onCapture, from = 'bottom' }: Props) {
-  const top = from === 'top';
+export default function NotificationCenter({
+  progress,
+  dragging,
+  now,
+  onClose,
+  onCapture,
+  from = "bottom",
+}: Props) {
+  const top = from === "top";
   const items = useVisibleNotices();
   const { update } = useGameState();
   const hidden = progress === 0 && !dragging;
 
   return (
-    <div className={`absolute inset-0 z-40 ${hidden ? 'invisible' : ''}`}>
-      <div className="absolute inset-0 bg-black/30" style={{ opacity: progress }} onClick={onClose} />
+    <div className={`absolute inset-0 z-40 ${hidden ? "invisible" : ""}`}>
+      <div
+        className="absolute inset-0 bg-black/30"
+        style={{ opacity: progress }}
+        onClick={onClose}
+      />
       <section
         className={
           top
-            ? 'absolute inset-x-0 top-0 flex h-[92%] flex-col rounded-b-[28px] bg-[var(--glass)] px-4 pb-4 pt-[calc(env(safe-area-inset-top)+44px)] shadow-[0_12px_40px_rgba(0,0,0,0.2)] backdrop-blur-[24px] backdrop-saturate-[180%]'
-            : 'absolute inset-x-0 bottom-0 flex h-[86%] flex-col rounded-t-[28px] bg-[var(--glass)] px-4 pb-8 pt-3 shadow-[0_-12px_40px_rgba(0,0,0,0.2)] backdrop-blur-[24px] backdrop-saturate-[180%]'
+            ? "absolute inset-x-0 top-0 flex h-[92%] flex-col rounded-b-[28px] bg-[var(--glass)] px-4 pb-4 pt-[calc(env(safe-area-inset-top)+44px)] shadow-[0_12px_40px_rgba(0,0,0,0.2)] backdrop-blur-[24px] backdrop-saturate-[180%]"
+            : "absolute inset-x-0 bottom-0 flex h-[86%] flex-col rounded-t-[28px] bg-[var(--glass)] px-4 pb-8 pt-3 shadow-[0_-12px_40px_rgba(0,0,0,0.2)] backdrop-blur-[24px] backdrop-saturate-[180%]"
         }
         style={{
           transform: `translate3d(0, ${(1 - progress) * (top ? -100 : 100)}%, 0)`,
-          transition: dragging ? 'none' : 'transform 450ms var(--spring)',
+          transition: dragging ? "none" : "transform 450ms var(--spring)",
         }}
       >
         {top ? null : <span className="mx-auto mb-2 h-1 w-9 rounded-full bg-[var(--fg-2)]" />}
@@ -63,16 +74,29 @@ export default function NotificationCenter({ progress, dragging, now, onClose, o
         ) : null}
         <ul className="mt-5 flex flex-1 flex-col gap-2 overflow-y-auto">
           {items.length === 0 ? (
-            <li className="py-10 text-center text-[15px] text-[var(--fg-2)]">새로운 알림이 없어요</li>
+            <li className="py-10 text-center text-[15px] text-[var(--fg-2)]">
+              새로운 알림이 없어요
+            </li>
           ) : (
             items.map((item) => (
               <li key={item.id}>
-                <NotificationItem appId={item.appId} title={item.title} body={item.body} time={item.time} />
+                <NotificationItem
+                  appId={item.appId}
+                  title={item.title}
+                  body={item.body}
+                  time={item.time}
+                />
               </li>
             ))
           )}
         </ul>
-        <button type="button" onClick={onClose} className="mx-auto mt-3 h-9 rounded-full px-5 text-[14px] font-semibold text-[var(--accent)]">닫기</button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="mx-auto mt-3 h-9 rounded-full px-5 text-[14px] font-semibold text-[var(--accent)]"
+        >
+          닫기
+        </button>
       </section>
     </div>
   );

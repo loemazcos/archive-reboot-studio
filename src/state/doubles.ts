@@ -1,9 +1,9 @@
-import { doublesPrompts } from '@/data/story/doubles';
-import type { RunState } from '@/state/runState';
-import { parseClock } from '@/state/social';
-import { DAY_MIN, type Notice, clockOf } from '@/state/timeline';
+import { doublesPrompts } from "@/data/story/doubles";
+import type { RunState } from "@/state/runState";
+import { parseClock } from "@/state/social";
+import { DAY_MIN, type Notice, clockOf } from "@/state/timeline";
 
-export type DoublesChoice = 'go' | 'sick';
+export type DoublesChoice = "go" | "sick";
 
 export type DoublesReply = { id: string; at: number; text: string };
 
@@ -35,13 +35,13 @@ export function settleDoubles(run: RunState): RunState {
   if (due.length === 0) return run;
   const notices: Notice[] = due.map((reply) => ({
     id: `doubles-reply-${reply.id}`,
-    appId: 'instagram',
-    title: '상혁',
+    appId: "instagram",
+    title: "상혁",
     body: reply.text,
     time: clockOf(reply.at),
     arriveAt: reply.at,
     queued: run.dnd,
-    threadId: 'sanghyuk',
+    threadId: "sanghyuk",
   }));
   return {
     ...run,

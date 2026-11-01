@@ -1,35 +1,35 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react';
-import { apps } from '@/data/apps.config';
-import { cuts } from '@/data/story/cuts';
-import { questions, defaultQuestion } from '@/data/story/questions';
-import AppSwitcher from '@/components/phone/AppSwitcher';
-import AppWindow from '@/components/phone/AppWindow';
-import BootScreen from '@/components/phone/BootScreen';
-import ClassOverlay from '@/components/phone/ClassOverlay';
-import CallScreen from '@/components/phone/CallScreen';
-import ClueBanner from '@/components/phone/ClueBanner';
-import ControlCenter from '@/components/phone/ControlCenter';
-import DayCutOverlay from '@/components/phone/DayCutOverlay';
-import DeadPhone from '@/components/phone/DeadPhone';
-import HomeScreen from '@/components/phone/HomeScreen';
-import IncomingCall from '@/components/phone/IncomingCall';
-import LockScreen from '@/components/phone/LockScreen';
-import NotificationBanner from '@/components/phone/NotificationBanner';
-import NotificationCenter from '@/components/phone/NotificationCenter';
-import SleepSheet from '@/components/phone/SleepSheet';
-import Spotlight from '@/components/phone/Spotlight';
-import { ScreenReportProvider, type ScreenSnapshot } from '@/components/phone/ScreenReport';
-import StatusBar from '@/components/phone/StatusBar';
-import TypingCutBanner from '@/components/phone/TypingCutBanner';
-import Wallpaper from '@/components/phone/Wallpaper';
-import { useClueDiscovery } from '@/hooks/useClueDiscovery';
-import { useGameClock } from '@/hooks/useGameClock';
-import { isNightTime } from '@/lib/gameTime';
-import { playSound, unlockAudio, vibrate } from '@/lib/sound';
-import { CALL_MIN_BATTERY, canCallBack, findCall, incomingCall } from '@/state/calls';
-import { fetchDmRows } from '@/lib/dmChat';
-import { remainingMinutes } from '@/lib/remit';
-import { useGameState } from '@/state/GameState';
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
+import { apps } from "@/data/apps.config";
+import { cuts } from "@/data/story/cuts";
+import { questions, defaultQuestion } from "@/data/story/questions";
+import AppSwitcher from "@/components/phone/AppSwitcher";
+import AppWindow from "@/components/phone/AppWindow";
+import BootScreen from "@/components/phone/BootScreen";
+import ClassOverlay from "@/components/phone/ClassOverlay";
+import CallScreen from "@/components/phone/CallScreen";
+import ClueBanner from "@/components/phone/ClueBanner";
+import ControlCenter from "@/components/phone/ControlCenter";
+import DayCutOverlay from "@/components/phone/DayCutOverlay";
+import DeadPhone from "@/components/phone/DeadPhone";
+import HomeScreen from "@/components/phone/HomeScreen";
+import IncomingCall from "@/components/phone/IncomingCall";
+import LockScreen from "@/components/phone/LockScreen";
+import NotificationBanner from "@/components/phone/NotificationBanner";
+import NotificationCenter from "@/components/phone/NotificationCenter";
+import SleepSheet from "@/components/phone/SleepSheet";
+import Spotlight from "@/components/phone/Spotlight";
+import { ScreenReportProvider, type ScreenSnapshot } from "@/components/phone/ScreenReport";
+import StatusBar from "@/components/phone/StatusBar";
+import TypingCutBanner from "@/components/phone/TypingCutBanner";
+import Wallpaper from "@/components/phone/Wallpaper";
+import { useClueDiscovery } from "@/hooks/useClueDiscovery";
+import { useGameClock } from "@/hooks/useGameClock";
+import { isNightTime } from "@/lib/gameTime";
+import { playSound, unlockAudio, vibrate } from "@/lib/sound";
+import { CALL_MIN_BATTERY, canCallBack, findCall, incomingCall } from "@/state/calls";
+import { fetchDmRows } from "@/lib/dmChat";
+import { remainingMinutes } from "@/lib/remit";
+import { useGameState } from "@/state/GameState";
 import {
   answerCall,
   callBack,
@@ -47,7 +47,7 @@ import {
   setDnd,
   setLowPower,
   markAppSeen,
-} from '@/state/runState';
+} from "@/state/runState";
 import {
   LOW_BATTERY_LINE,
   LOW_POWER_LINE,
@@ -57,16 +57,16 @@ import {
   minutesUntilNextBreak,
   phaseOf,
   type Notice,
-} from '@/state/timeline';
-import type { AppConfig, Rect } from '@/lib/types';
+} from "@/state/timeline";
+import type { AppConfig, Rect } from "@/lib/types";
 
-type SheetKind = 'nc' | 'cc' | 'spot';
-type GestureKind = SheetKind | 'close' | 'home';
+type SheetKind = "nc" | "cc" | "spot";
+type GestureKind = SheetKind | "close" | "home";
 type Gesture = {
   x: number;
   y: number;
-  zone: 'top' | 'bottom' | 'mid' | 'sheet';
-  side: 'nc' | 'cc';
+  zone: "top" | "bottom" | "mid" | "sheet";
+  side: "nc" | "cc";
   kind: GestureKind | null;
 };
 type Drag = { kind: GestureKind; p: number };
@@ -79,11 +79,11 @@ const DEFAULT_TRAVEL_PX = 844;
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 
-function resolveKind(zone: Gesture['zone'], dy: number, side: 'nc' | 'cc'): GestureKind | null {
-  if (zone === 'top' && dy > 0) return side;
-  if (zone === 'mid' && dy > 0) return 'spot';
-  if (zone === 'bottom' && dy < 0) return 'home';
-  if (zone === 'sheet' && dy < 0) return 'close';
+function resolveKind(zone: Gesture["zone"], dy: number, side: "nc" | "cc"): GestureKind | null {
+  if (zone === "top" && dy > 0) return side;
+  if (zone === "mid" && dy > 0) return "spot";
+  if (zone === "bottom" && dy < 0) return "home";
+  if (zone === "sheet" && dy < 0) return "close";
   return null;
 }
 
@@ -107,7 +107,12 @@ export default function Phone() {
   const [seenDay, setSeenDay] = useState(run.day);
   const [cutDay, setCutDay] = useState<number | null>(null);
   const [banner, setBanner] = useState<Notice | null>(null);
-  const arrivedNotices = run.notices.filter((notice) => notice.arriveAt <= run.t && !notice.queued && (!run.viewing || notice.threadId !== run.viewing));
+  const arrivedNotices = run.notices.filter(
+    (notice) =>
+      notice.arriveAt <= run.t &&
+      !notice.queued &&
+      (!run.viewing || notice.threadId !== run.viewing),
+  );
   const latestNotice = arrivedNotices[arrivedNotices.length - 1] ?? null;
   const seenNotice = useRef(latestNotice?.id ?? null);
   const audible = run.soundOn && !run.dnd;
@@ -119,7 +124,7 @@ export default function Phone() {
     // No banner for the app the player is already looking at.
     if (openStateRef.current?.app.id === latestNotice.appId) return;
     setBanner(latestNotice);
-    playSound('message', audible);
+    playSound("message", audible);
   }, [latestNotice, audible]);
   const clearBanner = useCallback(() => setBanner(null), []);
   useEffect(() => {
@@ -137,7 +142,7 @@ export default function Phone() {
 
   function currentScreenSource(): ScreenSnapshot {
     if (snapshot) return snapshot;
-    const name = openState?.app.name ?? '홈 화면';
+    const name = openState?.app.name ?? "홈 화면";
     return { screen: name, title: name, lines: [] };
   }
 
@@ -145,10 +150,19 @@ export default function Phone() {
     setFlashing(true);
     const rows = source.noticeId ? await fetchDmRows().catch(() => []) : [];
     const evidence = rows.some(
-      (row) => row.thread_id === 'sanghyuk' && row.status === 'unsent' && `dm-${row.id}` === source.noticeId,
+      (row) =>
+        row.thread_id === "sanghyuk" &&
+        row.status === "unsent" &&
+        `dm-${row.id}` === source.noticeId,
     );
     update((current) =>
-      captureScreen(current, { id: crypto.randomUUID(), screen: source.screen, title: source.title, lines: source.lines, evidence }),
+      captureScreen(current, {
+        id: crypto.randomUUID(),
+        screen: source.screen,
+        title: source.title,
+        lines: source.lines,
+        evidence,
+      }),
     );
   }
 
@@ -156,45 +170,50 @@ export default function Phone() {
     setSeenDay(run.day);
     setCutDay(run.day - 1);
   }
-  const cut = cutDay === null ? null : cuts.find((item) => item.day === cutDay) ?? null;
+  const cut = cutDay === null ? null : (cuts.find((item) => item.day === cutDay) ?? null);
 
   const phase = phaseOf(run);
-  const inClass = phase === 'school' && !run.booted;
+  const inClass = phase === "school" && !run.booted;
   const canSleep = minutesIntoDay(run) >= SLEEP_FROM && !run.booted;
   const remitMinutes = remainingMinutes(run.t);
-  const remitPulsing = run.remitStatus === 'open' && remitMinutes < 30;
+  const remitPulsing = run.remitStatus === "open" && remitMinutes < 30;
   const dimmed = run.lowPower || (!run.charging && run.battery <= LOW_POWER_LINE);
   const lowBattery = !run.charging && run.battery <= LOW_BATTERY_LINE;
   const sleepQuestion = questions[run.day as keyof typeof questions] ?? defaultQuestion;
-  const heartbeatOn = run.remitStatus === 'open' && remitMinutes < 10;
+  const heartbeatOn = run.remitStatus === "open" && remitMinutes < 10;
 
   useEffect(() => {
     if (!clueDiscovery.pending) return;
     setShaking(true);
-    playSound('clue', audible);
+    playSound("clue", audible);
     vibrate(20);
     const timer = window.setTimeout(() => setShaking(false), 500);
     return () => window.clearTimeout(timer);
   }, [clueDiscovery.pending, audible]);
 
   useEffect(() => {
-    if (lowBattery) playSound('battery', audible);
+    if (lowBattery) playSound("battery", audible);
   }, [lowBattery, audible]);
 
   useEffect(() => {
     if (!heartbeatOn) return;
-    const id = window.setInterval(() => playSound('heartbeat', audible), 1000);
+    const id = window.setInterval(() => playSound("heartbeat", audible), 1000);
     return () => window.clearInterval(id);
   }, [heartbeatOn, audible]);
 
   const finishBootScreen = useCallback(() => update(finishBoot), [update]);
   const clearDayCut = useCallback(() => setCutDay(null), []);
   const finishTypingCut = useCallback(() => update(markNightCutPlayed), [update]);
-  const stepActiveCall = useCallback((choice: number | null) => update((current) => stepCall(current, choice)), [update]);
+  const stepActiveCall = useCallback(
+    (choice: number | null) => update((current) => stepCall(current, choice)),
+    [update],
+  );
   const incoming = incomingCall(run);
   const activeCall = run.activeCall ? findCall(run.activeCall.id) : null;
 
-  const dark = run.appFlags['settings.theme'] === 'dark' || (run.appFlags['settings.theme'] !== 'light' && isNightTime(now));
+  const dark =
+    run.appFlags["settings.theme"] === "dark" ||
+    (run.appFlags["settings.theme"] !== "light" && isNightTime(now));
   const recentApps = recentIds.flatMap((id) => apps.filter((app) => app.id === id));
 
   function toScreenRect(target: DOMRect): Rect {
@@ -228,7 +247,7 @@ export default function Phone() {
     const travel = screenRef.current?.clientHeight || DEFAULT_TRAVEL_PX;
     const isOpen = sheet === kind;
     if (drag?.kind === kind && !isOpen) return clamp01(drag.p / travel);
-    if (drag?.kind === 'close' && isOpen) return clamp01(1 - drag.p / travel);
+    if (drag?.kind === "close" && isOpen) return clamp01(1 - drag.p / travel);
     return isOpen ? 1 : 0;
   }
 
@@ -251,200 +270,222 @@ export default function Phone() {
 
   return (
     <ScreenReportProvider value={setSnapshot}>
-    <div className="phone-frame">
-      <div
-        ref={screenRef}
-        className={shaking ? 'phone-screen phone-shake' : 'phone-screen'}
-        data-theme={dark ? 'dark' : 'light'}
-        onPointerDown={handlePointerDown}
-      >
-        <Wallpaper dim={dark} />
-        {locked ? null : (
-          <HomeScreen
+      <div className="phone-frame">
+        <div
+          ref={screenRef}
+          className={shaking ? "phone-screen phone-shake" : "phone-screen"}
+          data-theme={dark ? "dark" : "light"}
+          onPointerDown={handlePointerDown}
+        >
+          <Wallpaper dim={dark} />
+          {locked ? null : (
+            <HomeScreen
+              now={now}
+              page={page}
+              onPageChange={setPage}
+              editing={editing}
+              onStartEditing={() => setEditing(true)}
+              onStopEditing={() => setEditing(false)}
+              onOpenApp={openApp}
+              onOpenSearch={() => setSheet("spot")}
+            />
+          )}
+
+          {openState ? (
+            <AppWindow
+              key={openState.app.id}
+              app={openState.app}
+              origin={openState.origin}
+              closing={openState.closing}
+              onExited={() => setOpenState(null)}
+            />
+          ) : null}
+
+          {switcherOpen ? (
+            <AppSwitcher
+              apps={recentApps}
+              onResume={openApp}
+              onClose={() => setSwitcherOpen(false)}
+            />
+          ) : null}
+
+          <NotificationCenter
+            from="top"
+            progress={progressOf("nc")}
+            dragging={drag !== null}
             now={now}
-            page={page}
-            onPageChange={setPage}
-            editing={editing}
-            onStartEditing={() => setEditing(true)}
-            onStopEditing={() => setEditing(false)}
-            onOpenApp={openApp}
-            onOpenSearch={() => setSheet('spot')}
+            onClose={() => setSheet(null)}
+            onCapture={
+              latestNotice
+                ? () =>
+                    takeCapture({
+                      screen: "알림센터",
+                      title: latestNotice.title,
+                      lines: [latestNotice.body],
+                      noticeId: latestNotice.id,
+                    })
+                : undefined
+            }
           />
-        )}
-
-        {openState ? (
-          <AppWindow
-            key={openState.app.id}
-            app={openState.app}
-            origin={openState.origin}
-            closing={openState.closing}
-            onExited={() => setOpenState(null)}
+          <ControlCenter
+            progress={progressOf("cc")}
+            dragging={drag !== null}
+            onClose={() => setSheet(null)}
+            dnd={run.dnd}
+            onToggleDnd={() => update((current) => setDnd(current, !current.dnd))}
+            onCapture={() => takeCapture(currentScreenSource())}
+            lowPower={run.lowPower}
+            onToggleLowPower={() => update((current) => setLowPower(current, !current.lowPower))}
           />
-        ) : null}
-
-        {switcherOpen ? (
-          <AppSwitcher apps={recentApps} onResume={openApp} onClose={() => setSwitcherOpen(false)} />
-        ) : null}
-
-        <NotificationCenter
-          from="top"
-          progress={progressOf('nc')}
-          dragging={drag !== null}
-          now={now}
-          onClose={() => setSheet(null)}
-          onCapture={
-            latestNotice
-              ? () => takeCapture({ screen: '알림센터', title: latestNotice.title, lines: [latestNotice.body], noticeId: latestNotice.id })
-              : undefined
-          }
-        />
-        <ControlCenter
-          progress={progressOf('cc')}
-          dragging={drag !== null}
-          onClose={() => setSheet(null)}
-          dnd={run.dnd}
-          onToggleDnd={() => update((current) => setDnd(current, !current.dnd))}
-          onCapture={() => takeCapture(currentScreenSource())}
-          lowPower={run.lowPower}
-          onToggleLowPower={() => update((current) => setLowPower(current, !current.lowPower))}
-        />
-        <Spotlight
-          progress={progressOf('spot')}
-          dragging={drag !== null}
-          onClose={() => setSheet(null)}
-          onOpenApp={openFromSpotlight}
-        />
-
-        {locked ? <LockScreen now={now} onUnlock={() => setLocked(false)} /> : null}
-
-        {!locked && inClass ? (
-          <ClassOverlay
-            nextBreak={clockOf(run.t + minutesUntilNextBreak(run))}
-            onWait={() => update((current) => advanceRun(current, minutesUntilNextBreak(current), 0))}
+          <Spotlight
+            progress={progressOf("spot")}
+            dragging={drag !== null}
+            onClose={() => setSheet(null)}
+            onOpenApp={openFromSpotlight}
           />
-        ) : null}
 
-        {!locked && canSleep && !sleepOpen && !inClass ? (
-          <button
-            type="button"
-            onClick={() => setSleepOpen(true)}
-            className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+64px)] z-[54] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[var(--glass)] px-4 py-2 text-[13px] font-semibold text-[var(--fg)] backdrop-blur-[24px] transition-transform active:scale-95"
-          >
-            잠들기
-          </button>
-        ) : null}
+          {locked ? <LockScreen now={now} onUnlock={() => setLocked(false)} /> : null}
 
-        {!locked && sleepOpen ? (
-          <SleepSheet
-            question={sleepQuestion}
-            clueCount={run.clues.length}
-            ignores={run.ignores}
-            onClose={() => setSleepOpen(false)}
-            onSleep={(charging) => {
-              setSleepOpen(false);
-              update((current) => finishSleep(goToSleep(current, charging)));
-            }}
-          />
-        ) : null}
-
-        {!locked && canCallBack(run) ? (
-          <button
-            type="button"
-            onClick={() => update(callBack)}
-            className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+112px)] z-[54] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[#34C759] px-4 py-2 text-[13px] font-semibold text-white transition-transform active:scale-95"
-          >
-            상혁에게 다시 걸기
-          </button>
-        ) : null}
-
-        {!locked && lowBattery ? (
-          <p className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+104px)] z-[54] text-center text-[12px] font-semibold text-[#FF3B30]">
-            배터리 {run.battery}%
-          </p>
-        ) : null}
-
-        {remitPulsing ? (
-          <div
-            className="phone-edge-pulse pointer-events-none absolute inset-0 z-[58] rounded-[52px]"
-            style={{ animationDuration: remitMinutes < 10 ? '0.5s' : '0.9s' }}
-          />
-        ) : null}
-
-        {dimmed ? <div className="pointer-events-none absolute inset-0 z-[57] bg-black/25" /> : null}
-
-        {flashing ? <div className="pointer-events-none absolute inset-0 z-[70] bg-white" /> : null}
-
-        {!locked && run.nightCutPending && !run.nightCutPlayed ? <TypingCutBanner onDone={finishTypingCut} /> : null}
-
-        {!locked && banner ? (
-          <NotificationBanner
-            key={banner.id}
-            appId={banner.appId}
-            title={banner.title}
-            body={banner.body}
-            time={banner.time}
-            onDismiss={clearBanner}
-          />
-        ) : null}
-
-        {!locked && clueDiscovery.pending ? (
-          <ClueBanner key={clueDiscovery.pending} clueId={clueDiscovery.pending} onDone={clueDiscovery.dismiss} />
-        ) : null}
-
-        {!locked && incoming && !run.activeCall ? (
-          <IncomingCall
-            call={incoming}
-            canAnswer={run.battery >= CALL_MIN_BATTERY}
-            onAnswer={() => update(answerCall)}
-            onDecline={() => update(declineCall)}
-          />
-        ) : null}
-
-        {!locked && activeCall && run.activeCall ? (
-          <CallScreen
-            call={activeCall}
-            step={run.activeCall.step}
-            picks={run.activeCall.picks}
-            battery={run.battery}
-            onStep={stepActiveCall}
-            onHangUp={() => update(hangUpCall)}
-          />
-        ) : null}
-
-        {cut ? <DayCutOverlay key={cut.day} text={cut.text} onDone={clearDayCut} /> : null}
-
-        {!locked && run.battery <= 0 ? <DeadPhone onCharge={() => update(chargePhone)} /> : null}
-
-        {run.booted ? <BootScreen onDone={finishBootScreen} /> : null}
-
-        <StatusBar now={now} />
-
-        {locked ? null : (
-          <>
-            <button
-              type="button"
-              aria-label="알림 센터"
-              onClick={() => toggleSheet('nc')}
-              className="absolute left-0 top-0 z-[61] h-[52px] w-[40%]"
+          {!locked && inClass ? (
+            <ClassOverlay
+              nextBreak={clockOf(run.t + minutesUntilNextBreak(run))}
+              onWait={() =>
+                update((current) => advanceRun(current, minutesUntilNextBreak(current), 0))
+              }
             />
+          ) : null}
+
+          {!locked && canSleep && !sleepOpen && !inClass ? (
             <button
               type="button"
-              aria-label="제어 센터"
-              onClick={() => toggleSheet('cc')}
-              className="absolute right-0 top-0 z-[61] h-[52px] w-[40%]"
-            />
-            <button
-              type="button"
-              aria-label={openState ? '홈으로' : '최근 앱'}
-              onClick={pressHome}
-              className="group absolute bottom-0 left-1/2 z-[61] flex h-[30px] w-[200px] -translate-x-1/2 items-end justify-center pb-2"
+              onClick={() => setSleepOpen(true)}
+              className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+64px)] z-[54] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[var(--glass)] px-4 py-2 text-[13px] font-semibold text-[var(--fg)] backdrop-blur-[24px] transition-transform active:scale-95"
             >
-              <span className="h-[5px] w-[134px] rounded-full bg-[var(--fg)] transition-transform group-active:scale-x-90" />
+              잠들기
             </button>
-          </>
-        )}
+          ) : null}
+
+          {!locked && sleepOpen ? (
+            <SleepSheet
+              question={sleepQuestion}
+              clueCount={run.clues.length}
+              ignores={run.ignores}
+              onClose={() => setSleepOpen(false)}
+              onSleep={(charging) => {
+                setSleepOpen(false);
+                update((current) => finishSleep(goToSleep(current, charging)));
+              }}
+            />
+          ) : null}
+
+          {!locked && canCallBack(run) ? (
+            <button
+              type="button"
+              onClick={() => update(callBack)}
+              className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+112px)] z-[54] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[#34C759] px-4 py-2 text-[13px] font-semibold text-white transition-transform active:scale-95"
+            >
+              상혁에게 다시 걸기
+            </button>
+          ) : null}
+
+          {!locked && lowBattery ? (
+            <p className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+104px)] z-[54] text-center text-[12px] font-semibold text-[#FF3B30]">
+              배터리 {run.battery}%
+            </p>
+          ) : null}
+
+          {remitPulsing ? (
+            <div
+              className="phone-edge-pulse pointer-events-none absolute inset-0 z-[58] rounded-[52px]"
+              style={{ animationDuration: remitMinutes < 10 ? "0.5s" : "0.9s" }}
+            />
+          ) : null}
+
+          {dimmed ? (
+            <div className="pointer-events-none absolute inset-0 z-[57] bg-black/25" />
+          ) : null}
+
+          {flashing ? (
+            <div className="pointer-events-none absolute inset-0 z-[70] bg-white" />
+          ) : null}
+
+          {!locked && run.nightCutPending && !run.nightCutPlayed ? (
+            <TypingCutBanner onDone={finishTypingCut} />
+          ) : null}
+
+          {!locked && banner ? (
+            <NotificationBanner
+              key={banner.id}
+              appId={banner.appId}
+              title={banner.title}
+              body={banner.body}
+              time={banner.time}
+              onDismiss={clearBanner}
+            />
+          ) : null}
+
+          {!locked && clueDiscovery.pending ? (
+            <ClueBanner
+              key={clueDiscovery.pending}
+              clueId={clueDiscovery.pending}
+              onDone={clueDiscovery.dismiss}
+            />
+          ) : null}
+
+          {!locked && incoming && !run.activeCall ? (
+            <IncomingCall
+              call={incoming}
+              canAnswer={run.battery >= CALL_MIN_BATTERY}
+              onAnswer={() => update(answerCall)}
+              onDecline={() => update(declineCall)}
+            />
+          ) : null}
+
+          {!locked && activeCall && run.activeCall ? (
+            <CallScreen
+              call={activeCall}
+              step={run.activeCall.step}
+              picks={run.activeCall.picks}
+              battery={run.battery}
+              onStep={stepActiveCall}
+              onHangUp={() => update(hangUpCall)}
+            />
+          ) : null}
+
+          {cut ? <DayCutOverlay key={cut.day} text={cut.text} onDone={clearDayCut} /> : null}
+
+          {!locked && run.battery <= 0 ? <DeadPhone onCharge={() => update(chargePhone)} /> : null}
+
+          {run.booted ? <BootScreen onDone={finishBootScreen} /> : null}
+
+          <StatusBar now={now} />
+
+          {locked ? null : (
+            <>
+              <button
+                type="button"
+                aria-label="알림 센터"
+                onClick={() => toggleSheet("nc")}
+                className="absolute left-0 top-0 z-[61] h-[52px] w-[40%]"
+              />
+              <button
+                type="button"
+                aria-label="제어 센터"
+                onClick={() => toggleSheet("cc")}
+                className="absolute right-0 top-0 z-[61] h-[52px] w-[40%]"
+              />
+              <button
+                type="button"
+                aria-label={openState ? "홈으로" : "최근 앱"}
+                onClick={pressHome}
+                className="group absolute bottom-0 left-1/2 z-[61] flex h-[30px] w-[200px] -translate-x-1/2 items-end justify-center pb-2"
+              >
+                <span className="h-[5px] w-[134px] rounded-full bg-[var(--fg)] transition-transform group-active:scale-x-90" />
+              </button>
+            </>
+          )}
+        </div>
       </div>
-    </div>
     </ScreenReportProvider>
   );
 }

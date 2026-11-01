@@ -65,7 +65,12 @@ type RunState = {
   clues: string[];
   morning?: { erasedThrice: boolean; dndNight: boolean };
 };
-type ReplyMessage = { text: string; delay_min: number; unsend_after_min: number | null; typing_cycles: number };
+type ReplyMessage = {
+  text: string;
+  delay_min: number;
+  unsend_after_min: number | null;
+  typing_cycles: number;
+};
 type Reply = {
   messages: ReplyMessage[];
   effects: { trust: number; courage: number; rumor: number };
@@ -84,8 +89,12 @@ function json(body: unknown, status = 200): Result {
 function isTurn(value: unknown): value is Turn {
   if (!value || typeof value !== "object") return false;
   const turn = value as Record<string, unknown>;
-  return (turn.from === "me" || turn.from === "them") &&
-    typeof turn.text === "string" && turn.text.trim().length >= 1 && turn.text.length <= 300;
+  return (
+    (turn.from === "me" || turn.from === "them") &&
+    typeof turn.text === "string" &&
+    turn.text.trim().length >= 1 &&
+    turn.text.length <= 300
+  );
 }
 
 function toAnthropicMessages(history: Turn[]) {
@@ -120,7 +129,8 @@ function clampInt(value: unknown, min: number, max: number): number | null {
 function parseReply(input: unknown, threadId: string, run: RunState): Reply | null {
   if (!input || typeof input !== "object") return null;
   const raw = input as Record<string, unknown>;
-  if (!Array.isArray(raw.messages) || raw.messages.length < 1 || raw.messages.length > 3) return null;
+  if (!Array.isArray(raw.messages) || raw.messages.length < 1 || raw.messages.length > 3)
+    return null;
 
   const messages: ReplyMessage[] = [];
   for (const item of raw.messages) {
@@ -130,11 +140,18 @@ function parseReply(input: unknown, threadId: string, run: RunState): Reply | nu
     const delay = clampInt(m.delay_min, 0, 180);
     const typing = clampInt(m.typing_cycles, 0, 3);
     const unsend = m.unsend_after_min === null ? null : clampInt(m.unsend_after_min, 1, 30);
-    if (!text || delay === null || typing === null || (m.unsend_after_min !== null && unsend === null)) return null;
+    if (
+      !text ||
+      delay === null ||
+      typing === null ||
+      (m.unsend_after_min !== null && unsend === null)
+    )
+      return null;
     messages.push({ text, delay_min: delay, unsend_after_min: unsend, typing_cycles: typing });
   }
 
-  const effects = raw.effects && typeof raw.effects === "object" ? raw.effects as Record<string, unknown> : {};
+  const effects =
+    raw.effects && typeof raw.effects === "object" ? (raw.effects as Record<string, unknown>) : {};
   const trust = clampInt(effects.trust, -8, 8);
   const courage = clampInt(effects.courage, -8, 8);
   const rumor = clampInt(effects.rumor, -5, 10);
@@ -179,7 +196,8 @@ revealOk: ${JSON.stringify(revealOk)}
 
 function backupReply(threadId: string) {
   // Never inject random canned lines — they break conversation context.
-  void BACKUP_LINES; void threadId;
+  void BACKUP_LINES;
+  void threadId;
   const text = "앗 잠깐 폰 렉 걸렸어 ㅋㅋ 방금 뭐라 했어?";
   return {
     messages: [{ text, delay_min: 0, unsend_after_min: null, typing_cycles: 0 }],
@@ -191,14 +209,23 @@ function backupReply(threadId: string) {
 }
 
 async function loadRun(supabase: Db, deviceId: string): Promise<RunState | null> {
-  const { data, error } = await supabase.from("game_state").select("run").eq("device_id", deviceId).maybeSingle();
+  const { data, error } = await supabase
+    .from("game_state")
+    .select("run")
+    .eq("device_id", deviceId)
+    .maybeSingle();
   if (error) throw new Error("state failed");
   const run = data?.run;
   if (!run || typeof run.t !== "number") return null;
   return run as RunState;
 }
 
-async function recentOtherThreadsBlock(supabase: Db, deviceId: string, threadId: string, run: RunState) {
+async function recentOtherThreadsBlock(
+  supabase: Db,
+  deviceId: string,
+  threadId: string,
+  run: RunState,
+) {
   const { data, error } = await supabase
     .from("dm_messages")
     .select("thread_id, sender, body, deliver_at")
@@ -208,15 +235,24 @@ async function recentOtherThreadsBlock(supabase: Db, deviceId: string, threadId:
     .order("deliver_at", { ascending: false })
     .limit(RECENT_OTHER_LIMIT);
   if (error) throw new Error("recent failed");
-  const lines = ((data ?? []) as { thread_id: string; sender: string; body: string; deliver_at: number }[])
+  const lines = (
+    (data ?? []) as { thread_id: string; sender: string; body: string; deliver_at: number }[]
+  )
     .reverse()
-    .map((row) => `${row.thread_id === "sanghyuk" ? "상혁" : row.thread_id === "donghyun" ? "동현" : row.thread_id === "jaehyun" ? "재현" : "성호"}에게 ${row.sender === "me" ? "태산" : "상대"}: ${row.body}`);
+    .map(
+      (row) =>
+        `${row.thread_id === "sanghyuk" ? "상혁" : row.thread_id === "donghyun" ? "동현" : row.thread_id === "jaehyun" ? "재현" : "성호"}에게 ${row.sender === "me" ? "태산" : "상대"}: ${row.body}`,
+    );
   if (lines.length === 0) return "";
   return `\n<recent>\n태산이 다른 사람과 최근에 나눈 대화(참고만 하고 그 내용을 그대로 옮기지 않는다):\n${lines.join("\n")}\n</recent>`;
 }
 
 async function consumeRateLimit(supabase: Db, key: string, windowStart: string, limit: number) {
-  const { data, error } = await supabase.rpc("consume_rate_limit", { p_key: key, p_window: windowStart, p_limit: limit });
+  const { data, error } = await supabase.rpc("consume_rate_limit", {
+    p_key: key,
+    p_window: windowStart,
+    p_limit: limit,
+  });
   if (error) throw error;
   return data === true;
 }
@@ -226,9 +262,11 @@ async function isWithinLimits(supabase: Db, deviceId: string) {
   const minuteStart = new Date(Math.floor(now / 60000) * 60000).toISOString();
   const dayStart = new Date(Math.floor(now / 86400000) * 86400000).toISOString();
   const globalCap = Number(process.env["GLOBAL_DAILY_CAP"]) || 3000;
-  return (await consumeRateLimit(supabase, `minute:${deviceId}`, minuteStart, MINUTE_LIMIT)) &&
+  return (
+    (await consumeRateLimit(supabase, `minute:${deviceId}`, minuteStart, MINUTE_LIMIT)) &&
     (await consumeRateLimit(supabase, `day:${deviceId}`, dayStart, DAY_LIMIT)) &&
-    (await consumeRateLimit(supabase, "global", dayStart, globalCap));
+    (await consumeRateLimit(supabase, "global", dayStart, globalCap))
+  );
 }
 
 const GEMINI_SCHEMA = {
@@ -251,7 +289,11 @@ const GEMINI_SCHEMA = {
     },
     effects: {
       type: "OBJECT",
-      properties: { trust: { type: "INTEGER" }, courage: { type: "INTEGER" }, rumor: { type: "INTEGER" } },
+      properties: {
+        trust: { type: "INTEGER" },
+        courage: { type: "INTEGER" },
+        rumor: { type: "INTEGER" },
+      },
       required: ["trust", "courage", "rumor"],
     },
     reveal: { type: "ARRAY", items: { type: "STRING" } },
@@ -264,12 +306,14 @@ const GEMINI_SCHEMA = {
 // Character replies: user's own Gemini key when set, otherwise the built-in AI gateway (Gemini).
 async function requestClaudeReply(history: Turn[], system: string): Promise<unknown | null> {
   for (let attempt = 0; attempt < 2; attempt++) {
-    const out = await (process.env["GEMINI_API_KEY"] ? requestGemini(history, system) : requestGateway(history, system)).catch(
-      (e) => {
-        console.error("ai error", e);
-        return null;
-      },
-    );
+    const out = await (
+      process.env["GEMINI_API_KEY"]
+        ? requestGemini(history, system)
+        : requestGateway(history, system)
+    ).catch((e) => {
+      console.error("ai error", e);
+      return null;
+    });
     if (out) return out;
   }
   return null;
@@ -288,7 +332,16 @@ async function requestGateway(history: Turn[], system: string): Promise<unknown 
     body: JSON.stringify({
       model: "google/gemini-3-flash-preview",
       messages: [{ role: "system", content: system + SYSTEM_SUFFIX }, ...messages],
-      tools: [{ type: "function", function: { name: "reply", description: REPLY_TOOL.description, parameters: REPLY_TOOL.input_schema } }],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "reply",
+            description: REPLY_TOOL.description,
+            parameters: REPLY_TOOL.input_schema,
+          },
+        },
+      ],
       tool_choice: { type: "function", function: { name: "reply" } },
     }),
   });
@@ -334,7 +387,9 @@ async function requestGemini(history: Turn[], system: string): Promise<unknown |
     return null;
   }
   const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? "").join("");
+  const text = data?.candidates?.[0]?.content?.parts
+    ?.map((p: { text?: string }) => p.text ?? "")
+    .join("");
   if (!text) return null;
   try {
     return JSON.parse(text);
@@ -418,7 +473,8 @@ export async function handle(body: any): Promise<Result> {
       return json({ error: "잘못된 요청이에요." }, 400);
     }
 
-    const supabase: Db = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
+    const supabase: Db = (await import("@/integrations/supabase/client.server"))
+      .supabaseAdmin as any;
 
     if (typeof body?.callback === "string") {
       if (!CALLBACK_KEYS.includes(body.callback)) return json({ error: "잘못된 요청이에요." }, 400);
@@ -427,7 +483,12 @@ export async function handle(body: any): Promise<Result> {
       return json(await deliverCallback(supabase, deviceId, body.callback, run));
     }
 
-    if (!PERSONAS[threadId] || !Array.isArray(history) || history.length < 1 || history.length > 30) {
+    if (
+      !PERSONAS[threadId] ||
+      !Array.isArray(history) ||
+      history.length < 1 ||
+      history.length > 30
+    ) {
       return json({ error: "잘못된 요청이에요." }, 400);
     }
     if (!history.every(isTurn)) {
@@ -467,7 +528,11 @@ export async function handle(body: any): Promise<Result> {
     if (!parsed) return json({ error: "답장을 불러오지 못했어요. 잠시 후 다시 보내 주세요." }, 503);
     const finalReply: Reply = parsed;
     // Friends answer right away mid-chat; only Sanghyuk keeps his deliberate delays.
-    if (threadId !== "sanghyuk") finalReply.messages = finalReply.messages.map((m, i) => ({ ...m, delay_min: i === 0 ? 0 : Math.min(m.delay_min, 1) }));
+    if (threadId !== "sanghyuk")
+      finalReply.messages = finalReply.messages.map((m, i) => ({
+        ...m,
+        delay_min: i === 0 ? 0 : Math.min(m.delay_min, 1),
+      }));
     const reply: Reply & { fallback: boolean } = { ...finalReply, fallback: false };
 
     await insertThemMessages(supabase, deviceId, threadId, run.t, reply.messages);

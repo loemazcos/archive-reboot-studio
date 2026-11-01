@@ -1,7 +1,7 @@
-import { BatteryFull, BatteryLow, Moon, Signal, Wifi } from 'lucide-react';
-import { formatClock } from '@/lib/gameTime';
-import { useGameState } from '@/state/GameState';
-import { LOW_POWER_LINE } from '@/state/timeline';
+import { BatteryFull, BatteryLow, Moon, Signal, Wifi } from "lucide-react";
+import { formatClock } from "@/lib/gameTime";
+import { useGameState } from "@/state/GameState";
+import { LOW_POWER_LINE } from "@/state/timeline";
 
 type Props = { now: Date };
 
@@ -21,10 +21,15 @@ export default function StatusBar({ now }: Props) {
       <span className="flex items-center gap-1.5">
         <Signal size={16} strokeWidth={2.4} aria-hidden="true" />
         <Wifi size={16} strokeWidth={2.4} aria-hidden="true" />
-        <span className={`text-[13px] font-semibold tabular-nums ${low ? 'text-[#FFCC00]' : ''}`}>
-          {run.battery.toFixed(1).replace(/\.0$/, '')}%
+        <span className={`text-[13px] font-semibold tabular-nums ${low ? "text-[#FFCC00]" : ""}`}>
+          {run.battery.toFixed(1).replace(/\.0$/, "")}%
         </span>
-        <BatteryIcon size={22} strokeWidth={2} aria-hidden="true" className={low ? 'text-[#FFCC00]' : ''} />
+        <BatteryIcon
+          size={22}
+          strokeWidth={2}
+          aria-hidden="true"
+          className={low ? "text-[#FFCC00]" : ""}
+        />
       </span>
     </header>
   );

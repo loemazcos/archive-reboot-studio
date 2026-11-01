@@ -1,6 +1,6 @@
-import type { RunState } from '@/state/runState';
-import { DAY_MIN, clockOf, type Notice } from '@/state/timeline';
-import { rumorPosts } from '@/data/story/rumors';
+import type { RunState } from "@/state/runState";
+import { DAY_MIN, clockOf, type Notice } from "@/state/timeline";
+import { rumorPosts } from "@/data/story/rumors";
 
 export type SocialState = {
   liked: string[];
@@ -9,7 +9,7 @@ export type SocialState = {
   rumorSeen: string[];
   rumorNotes: string[];
   tiplineDay: number | null;
-  account: 'main' | 'sub';
+  account: "main" | "sub";
   subHeartDay: number | null;
   subHeartDelivered: boolean;
 };
@@ -21,16 +21,16 @@ export const DEFAULT_SOCIAL: SocialState = {
   rumorSeen: [],
   rumorNotes: [],
   tiplineDay: null,
-  account: 'main',
+  account: "main",
   subHeartDay: null,
   subHeartDelivered: false,
 };
 
 export const SUB_ACCOUNT_DAY = 4;
-export const SANGHYUK_HANDLE = 'sanghyuk.gym';
-export const SUB_HANDLE = 'xclovts';
-export const MAIN_HANDLE = 'taesan.k';
-export const RUMOR_HANDLE = 'bonego_tip_line';
+export const SANGHYUK_HANDLE = "sanghyuk.gym";
+export const SUB_HANDLE = "xclovts";
+export const MAIN_HANDLE = "taesan.k";
+export const RUMOR_HANDLE = "bonego_tip_line";
 
 const clamp = (value: number) => Math.min(100, Math.max(0, value));
 
@@ -43,7 +43,7 @@ export function minuteOfDay(t: number): number {
 }
 
 export function parseClock(time: string): number {
-  const [hour, minute] = time.split(':').map(Number);
+  const [hour, minute] = time.split(":").map(Number);
   return hour * 60 + minute;
 }
 
@@ -70,21 +70,24 @@ export function settleSocial(run: RunState): RunState {
     next = {
       ...next,
       rumor: clamp(next.rumor + delta),
-      social: { ...next.social, rumorSeen: [...next.social.rumorSeen, ...arriving.map((post) => post.id)] },
+      social: {
+        ...next.social,
+        rumorSeen: [...next.social.rumorSeen, ...arriving.map((post) => post.id)],
+      },
     };
   }
 
   const { subHeartDay, subHeartDelivered } = next.social;
   if (subHeartDay !== null && !subHeartDelivered && dayIndex(next.t) > subHeartDay) {
     const notice: Notice = {
-      id: 'sanghyuk-sub-heart',
-      appId: 'instagram',
-      title: '상혁',
-      body: '그 계정 누구냐ㅋㅋ. 모르는 사람이 하트를 눌렀더라.',
+      id: "sanghyuk-sub-heart",
+      appId: "instagram",
+      title: "상혁",
+      body: "그 계정 누구냐ㅋㅋ. 모르는 사람이 하트를 눌렀더라.",
       time: clockOf(next.t),
       arriveAt: next.t,
       queued: next.dnd,
-      threadId: 'sanghyuk',
+      threadId: "sanghyuk",
     };
     next = {
       ...next,

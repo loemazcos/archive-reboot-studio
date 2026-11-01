@@ -1,6 +1,6 @@
-import { findApp } from '@/lib/apps';
-import AppGlyph from '@/components/phone/AppGlyph';
-import { PROFILE_PHOTOS } from '@/lib/profiles';
+import { findApp } from "@/lib/apps";
+import AppGlyph from "@/components/phone/AppGlyph";
+import { PROFILE_PHOTOS } from "@/lib/profiles";
 
 type Props = { appId: string; title: string; body: string; time: string };
 

@@ -1,5 +1,5 @@
-import { Users } from 'lucide-react';
-import { previewOf, type KakaoRoom } from '@/lib/kakao';
+import { Users } from "lucide-react";
+import { previewOf, type KakaoRoom } from "@/lib/kakao";
 
 type Props = { rooms: KakaoRoom[]; onOpen: (id: string) => void };
 
@@ -25,7 +25,9 @@ export default function KakaoRoomList({ rooms, onOpen }: Props) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <p className="truncate text-[15px] font-semibold">{room.name}</p>
-                    <span className="shrink-0 text-[12px] text-[var(--fg-2)]">{room.memberCount}</span>
+                    <span className="shrink-0 text-[12px] text-[var(--fg-2)]">
+                      {room.memberCount}
+                    </span>
                   </div>
                   <p className="truncate text-[13px] text-[var(--fg-2)]">{previewOf(last)}</p>
                 </div>

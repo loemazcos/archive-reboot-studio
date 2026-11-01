@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { callFunction } from '@/lib/gameApi';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { callFunction } from "@/lib/gameApi";
 
 type DiscoverResponse = { ok?: unknown };
 const RETRY_MS = 15000;
@@ -17,9 +17,12 @@ export function useClueDiscovery(found: string[]) {
       .filter((clueId) => !synced.current.has(clueId))
       .map((clueId) => {
         synced.current.add(clueId);
-        return callFunction<DiscoverResponse>('game-api', { action: 'discoverClue', payload: { clueId } })
+        return callFunction<DiscoverResponse>("game-api", {
+          action: "discoverClue",
+          payload: { clueId },
+        })
           .then((response) => {
-            if (response.ok !== true) throw new Error('discover failed');
+            if (response.ok !== true) throw new Error("discover failed");
           })
           .catch(() => {
             synced.current.delete(clueId);

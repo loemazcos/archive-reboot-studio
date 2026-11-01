@@ -1,24 +1,24 @@
-import { useEffect, useState } from 'react';
-import { Delete } from 'lucide-react';
-import { device } from '@/data/device';
+import { useEffect, useState } from "react";
+import { Delete } from "lucide-react";
+import { device } from "@/data/device";
 
 const LETTERS: Record<string, string> = {
-  '2': 'ABC',
-  '3': 'DEF',
-  '4': 'GHI',
-  '5': 'JKL',
-  '6': 'MNO',
-  '7': 'PQRS',
-  '8': 'TUV',
-  '9': 'WXYZ',
+  "2": "ABC",
+  "3": "DEF",
+  "4": "GHI",
+  "5": "JKL",
+  "6": "MNO",
+  "7": "PQRS",
+  "8": "TUV",
+  "9": "WXYZ",
 };
 
-const DIGITS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'];
+const DIGITS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"];
 
 type Props = { onUnlock: () => void; onCancel: () => void };
 
 export default function PasscodePad({ onUnlock, onCancel }: Props) {
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState("");
   const [failures, setFailures] = useState(0);
   const [lockedUntil, setLockedUntil] = useState(0);
   const [shakeKey, setShakeKey] = useState(0);
@@ -46,7 +46,7 @@ export default function PasscodePad({ onUnlock, onCancel }: Props) {
     }
     navigator.vibrate?.([60, 40, 60]);
     setShakeKey((key) => key + 1);
-    setCode('');
+    setCode("");
     const count = failures + 1;
     if (count >= device.maxPasscodeTries) {
       setFailures(0);
@@ -56,27 +56,27 @@ export default function PasscodePad({ onUnlock, onCancel }: Props) {
     }
   }
 
-  let message = '암호를 입력하세요';
+  let message = "암호를 입력하세요";
   if (remaining > 0) message = `${remaining}초 뒤에 다시 시도하세요`;
   else if (failures >= device.passcodeHintAfter) message = `힌트: ${device.passcodeHint}`;
 
   return (
     <div className="flex flex-col items-center gap-6 px-6 pb-[calc(env(safe-area-inset-bottom)+20px)]">
       <p className="text-[15px] font-medium text-[var(--fg)]">{message}</p>
-      <div key={shakeKey} className={`flex gap-4 ${shakeKey ? 'phone-shake' : ''}`}>
+      <div key={shakeKey} className={`flex gap-4 ${shakeKey ? "phone-shake" : ""}`}>
         {[0, 1, 2, 3].map((index) => (
           <span
             key={index}
             className={`h-3.5 w-3.5 rounded-full border-2 border-[var(--fg)] transition-colors duration-150 ${
-              index < code.length ? 'bg-[var(--fg)]' : ''
+              index < code.length ? "bg-[var(--fg)]" : ""
             }`}
           />
         ))}
       </div>
       <div className="grid grid-cols-3 gap-x-5 gap-y-3">
         {DIGITS.map((digit, index) => {
-          if (digit === '') return <span key={index} />;
-          if (digit === 'del') {
+          if (digit === "") return <span key={index} />;
+          if (digit === "del") {
             return (
               <span key={index} className="flex h-[76px] w-[76px] items-center justify-center">
                 {code.length > 0 ? (
@@ -101,13 +101,17 @@ export default function PasscodePad({ onUnlock, onCancel }: Props) {
             >
               <span className="text-[32px] font-light leading-none">{digit}</span>
               <span className="mt-0.5 h-[12px] text-[10px] font-semibold tracking-[2px] text-[var(--fg-2)]">
-                {LETTERS[digit] ?? ''}
+                {LETTERS[digit] ?? ""}
               </span>
             </button>
           );
         })}
       </div>
-      <button type="button" onClick={onCancel} className="h-11 px-4 text-[17px] text-[var(--accent)]">
+      <button
+        type="button"
+        onClick={onCancel}
+        className="h-11 px-4 text-[17px] text-[var(--accent)]"
+      >
         취소
       </button>
     </div>

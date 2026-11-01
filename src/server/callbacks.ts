@@ -2,6 +2,6 @@
 // text: 대화방에 그대로 나오는 문장
 // mindDelta: 도착했을 때 상혁 마음에 더하는 값(없으면 0)
 export const callbacks = {
-  erasedThrice: { text: '쓰다 지웠냐.', mindDelta: 2 },
-  dndNight: { text: '…방해금지냐.', mindDelta: 0 },
+  erasedThrice: { text: "쓰다 지웠냐.", mindDelta: 2 },
+  dndNight: { text: "…방해금지냐.", mindDelta: 0 },
 };

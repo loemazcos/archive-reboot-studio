@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 const SCREEN_WIDTH = 390;
 const SCREEN_HEIGHT = 844;
@@ -23,8 +23,8 @@ export function usePhoneScale() {
 
   useEffect(() => {
     const handleResize = () => setScale(computeScale());
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return scale;

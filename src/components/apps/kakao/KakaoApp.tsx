@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
-import KakaoRoomList from '@/components/apps/kakao/KakaoRoomList';
-import KakaoRoomChat from '@/components/apps/kakao/KakaoRoomChat';
-import { kakaoRooms, kakaoUnread, type KakaoMessage, type KakaoRoom } from '@/lib/kakao';
-import { useGameState } from '@/state/GameState';
-import { chooseConsult, voteUniform } from '@/state/kakaoActions';
-import { UNIFORM_POLL_ID } from '@/state/kakaoEvents';
-import { leaveThread, viewThread } from '@/state/runState';
+import { useEffect, useMemo, useState } from "react";
+import KakaoRoomList from "@/components/apps/kakao/KakaoRoomList";
+import KakaoRoomChat from "@/components/apps/kakao/KakaoRoomChat";
+import { kakaoRooms, kakaoUnread, type KakaoMessage, type KakaoRoom } from "@/lib/kakao";
+import { useGameState } from "@/state/GameState";
+import { chooseConsult, voteUniform } from "@/state/kakaoActions";
+import { UNIFORM_POLL_ID } from "@/state/kakaoEvents";
+import { leaveThread, viewThread } from "@/state/runState";
 
 export default function KakaoApp() {
   const { run, update } = useGameState();
@@ -27,7 +27,8 @@ export default function KakaoApp() {
     [sent, run],
   );
 
-  const votes: Record<string, number> = run.uniform === null ? {} : { [UNIFORM_POLL_ID]: run.uniform - 1 };
+  const votes: Record<string, number> =
+    run.uniform === null ? {} : { [UNIFORM_POLL_ID]: run.uniform - 1 };
 
   const activeRoom = rooms.find((room) => room.id === openId) ?? null;
 
@@ -49,7 +50,14 @@ export default function KakaoApp() {
             ...current,
             [activeRoom.id]: [
               ...(current[activeRoom.id] ?? []),
-              { id: `sent-${Date.now()}`, date: '2026-10-14', time: '방금', from: 'me', type: 'text', text },
+              {
+                id: `sent-${Date.now()}`,
+                date: "2026-10-14",
+                time: "방금",
+                from: "me",
+                type: "text",
+                text,
+              },
             ],
           }))
         }

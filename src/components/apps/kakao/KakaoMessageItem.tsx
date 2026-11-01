@@ -1,6 +1,6 @@
-import { FileText, Calendar } from 'lucide-react';
-import Avatar from '@/components/apps/Avatar';
-import type { KakaoMessage } from '@/lib/kakao';
+import { FileText, Calendar } from "lucide-react";
+import Avatar from "@/components/apps/Avatar";
+import type { KakaoMessage } from "@/lib/kakao";
 
 type Props = {
   message: KakaoMessage;
@@ -10,13 +10,13 @@ type Props = {
 };
 
 export default function KakaoMessageItem({ message, showSender, chosenOption, onVote }: Props) {
-  if (message.type === 'deleted') {
+  if (message.type === "deleted") {
     return <p className="my-1.5 text-center text-[12px] text-[var(--fg-2)]">{message.text}</p>;
   }
 
-  const mine = message.from === 'me';
+  const mine = message.from === "me";
 
-  if (message.type === 'notice') {
+  if (message.type === "notice") {
     return (
       <div className="my-2 rounded-[14px] border border-[var(--line)] bg-[var(--card)] px-3.5 py-3">
         <p className="mb-1 text-[11px] font-semibold text-[var(--fg-2)]">공지 · {message.from}</p>
@@ -25,7 +25,7 @@ export default function KakaoMessageItem({ message, showSender, chosenOption, on
     );
   }
 
-  if (message.type === 'poll') {
+  if (message.type === "poll") {
     const options = message.options ?? [];
     const counts = options.map((option, index) => option.votes + (chosenOption === index ? 1 : 0));
     const total = counts.reduce((sum, count) => sum + count, 0);
@@ -46,7 +46,7 @@ export default function KakaoMessageItem({ message, showSender, chosenOption, on
                   type="button"
                   onClick={() => onVote(index)}
                   className={`relative overflow-hidden rounded-[10px] border px-3 py-2 text-left text-[13px] transition-colors ${
-                    selected ? 'border-[#FEE500]' : 'border-[var(--line)]'
+                    selected ? "border-[#FEE500]" : "border-[var(--line)]"
                   }`}
                 >
                   <span
@@ -63,14 +63,16 @@ export default function KakaoMessageItem({ message, showSender, chosenOption, on
             })}
           </div>
           <p className="mt-2 text-[11px] text-[var(--fg-2)]">
-            {chosenOption === undefined ? '한 항목을 골라 투표하세요' : `총 ${total}표 · 내 표 반영됨`}
+            {chosenOption === undefined
+              ? "한 항목을 골라 투표하세요"
+              : `총 ${total}표 · 내 표 반영됨`}
           </p>
         </div>
       </div>
     );
   }
 
-  if (message.type === 'schedule') {
+  if (message.type === "schedule") {
     return (
       <div className="my-1.5 flex gap-2">
         <Avatar photo={message.from} label={message.from} size={32} />
@@ -94,14 +96,19 @@ export default function KakaoMessageItem({ message, showSender, chosenOption, on
     );
   }
 
-  if (message.type === 'file') {
+  if (message.type === "file") {
     return (
       <div className="my-1.5 flex gap-2">
         <Avatar photo={message.from} label={message.from} size={32} />
         <div className="min-w-0 flex-1">
           {showSender && <p className="mb-1 text-[12px] text-[var(--fg-2)]">{message.from}</p>}
           <div className="flex items-center gap-3 rounded-[14px] bg-[var(--card)] px-3.5 py-3">
-            <FileText size={22} strokeWidth={1.8} className="shrink-0 text-[var(--fg-2)]" aria-hidden="true" />
+            <FileText
+              size={22}
+              strokeWidth={1.8}
+              className="shrink-0 text-[var(--fg-2)]"
+              aria-hidden="true"
+            />
             <div className="min-w-0">
               <p className="truncate text-[14px] font-medium">{message.text}</p>
               <p className="text-[12px] text-[var(--fg-2)]">{message.size}</p>

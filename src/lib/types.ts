@@ -1,4 +1,4 @@
-import type { apps } from '@/data/apps.config';
+import type { apps } from "@/data/apps.config";
 
 export type AppConfig = (typeof apps)[number];
 

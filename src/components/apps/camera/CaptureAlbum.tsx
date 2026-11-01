@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { X } from 'lucide-react';
-import CaptureCard from '@/components/apps/camera/CaptureCard';
-import { useGameState } from '@/state/GameState';
-import { MAX_CAPTURES } from '@/state/captures';
+import { useState } from "react";
+import { X } from "lucide-react";
+import CaptureCard from "@/components/apps/camera/CaptureCard";
+import { useGameState } from "@/state/GameState";
+import { MAX_CAPTURES } from "@/state/captures";
 
 export function CaptureAlbum({ onBack }: { onBack?: () => void }) {
   const { run } = useGameState();
@@ -12,7 +12,12 @@ export function CaptureAlbum({ onBack }: { onBack?: () => void }) {
 
   return (
     <div className="relative flex h-full flex-col bg-[var(--bg)] text-[var(--fg)]">
-      <header className="px-4 pb-3 pt-[calc(env(safe-area-inset-top)+58px)]">{onBack ? <button type="button" onClick={onBack} className="mb-2 text-[16px] text-[var(--accent)]">‹ 카메라</button> : null}
+      <header className="px-4 pb-3 pt-[calc(env(safe-area-inset-top)+58px)]">
+        {onBack ? (
+          <button type="button" onClick={onBack} className="mb-2 text-[16px] text-[var(--accent)]">
+            ‹ 카메라
+          </button>
+        ) : null}
         <p className="text-[24px] font-bold leading-[1.2]">사진첩</p>
         <p className="text-[12px] text-[var(--fg-2)]">
           {run.captures.length} / {MAX_CAPTURES}장

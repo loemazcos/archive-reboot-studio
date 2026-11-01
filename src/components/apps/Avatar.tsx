@@ -1,4 +1,4 @@
-import { PROFILE_PHOTOS } from '@/lib/profiles';
+import { PROFILE_PHOTOS } from "@/lib/profiles";
 
 type Props = { photo: string | null; label: string; size?: number };
 

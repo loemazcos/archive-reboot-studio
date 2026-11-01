@@ -1,8 +1,8 @@
-import { consults } from '@/data/story/consults';
-import { parseClock } from '@/state/social';
-import { DAY_MIN } from '@/state/timeline';
+import { consults } from "@/data/story/consults";
+import { parseClock } from "@/state/social";
+import { DAY_MIN } from "@/state/timeline";
 
-export type ConsultRoom = 'donghyun' | 'jaehyun';
+export type ConsultRoom = "donghyun" | "jaehyun";
 
 export type ConsultEffect = {
   courage?: number;

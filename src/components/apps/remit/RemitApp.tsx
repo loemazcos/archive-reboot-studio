@@ -1,19 +1,19 @@
-import { Wallet } from 'lucide-react';
-import { formatRemain, remainingMinutes } from '@/lib/remit';
-import { useGameState } from '@/state/GameState';
-import { receiveRemit } from '@/state/runState';
+import { Wallet } from "lucide-react";
+import { formatRemain, remainingMinutes } from "@/lib/remit";
+import { useGameState } from "@/state/GameState";
+import { receiveRemit } from "@/state/runState";
 
 export default function RemitApp() {
   const { run, update } = useGameState();
   const minutesLeft = remainingMinutes(run.t);
-  const expiringSoon = run.remitStatus === 'open' && minutesLeft < 30;
+  const expiringSoon = run.remitStatus === "open" && minutesLeft < 30;
 
   const statusText =
-    run.remitStatus === 'open'
+    run.remitStatus === "open"
       ? `${formatRemain(minutesLeft)} 후 만료`
-      : run.remitStatus === 'received'
-        ? '받은 송금'
-        : '만료된 송금';
+      : run.remitStatus === "received"
+        ? "받은 송금"
+        : "만료된 송금";
 
   return (
     <div className="flex h-full flex-col bg-white px-4 pb-8 pt-[calc(env(safe-area-inset-top)+58px)] text-[#191F28]">
@@ -31,12 +31,12 @@ export default function RemitApp() {
         <p className="text-[32px] font-bold tabular-nums">1원</p>
         <p
           className={`text-[13px] ${
-            expiringSoon ? 'font-semibold text-[#B91C1C] dark:text-[#FCA5A5]' : 'text-[#6B7684]'
+            expiringSoon ? "font-semibold text-[#B91C1C] dark:text-[#FCA5A5]" : "text-[#6B7684]"
           }`}
         >
           {statusText}
         </p>
-        {run.remitStatus === 'open' ? (
+        {run.remitStatus === "open" ? (
           <button
             type="button"
             onClick={() => update(receiveRemit)}

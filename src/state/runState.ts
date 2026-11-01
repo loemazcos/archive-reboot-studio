@@ -1,12 +1,12 @@
-import { device } from '@/data/device';
-import { costs } from '@/data/story/costs';
-import { effects } from '@/data/story/effects';
-import { notices } from '@/data/story/notices';
-import { onDayStart } from '@/state/dayStart';
-import { DEFAULT_SOCIAL, settleSocial, type SocialState } from '@/state/social';
-import { DEFAULT_CONSULT, type ConsultState } from '@/state/consults';
-import { DEFAULT_DOUBLES, settleDoubles, type DoublesState } from '@/state/doubles';
-import { settleKakaoEvents, type KakaoAddition } from '@/state/kakaoEvents';
+import { device } from "@/data/device";
+import { costs } from "@/data/story/costs";
+import { effects } from "@/data/story/effects";
+import { notices } from "@/data/story/notices";
+import { onDayStart } from "@/state/dayStart";
+import { DEFAULT_SOCIAL, settleSocial, type SocialState } from "@/state/social";
+import { DEFAULT_CONSULT, type ConsultState } from "@/state/consults";
+import { DEFAULT_DOUBLES, settleDoubles, type DoublesState } from "@/state/doubles";
+import { settleKakaoEvents, type KakaoAddition } from "@/state/kakaoEvents";
 import {
   CALL_DROP_MIND,
   CALL_MIN_BATTERY,
@@ -20,9 +20,9 @@ import {
   missCall,
   settleCalls,
   type CallScript,
-} from '@/state/calls';
-import { clampStat } from '@/state/stats';
-import { CAPTURE_BATTERY, CAPTURE_MINUTES, pushCapture, type Capture } from '@/state/captures';
+} from "@/state/calls";
+import { clampStat } from "@/state/stats";
+import { CAPTURE_BATTERY, CAPTURE_MINUTES, pushCapture, type Capture } from "@/state/captures";
 import {
   CHARGED_BATTERY,
   DAY_MIN,
@@ -40,16 +40,16 @@ import {
   isRecessSkipped,
   type Crossing,
   type Notice,
-} from '@/state/timeline';
+} from "@/state/timeline";
 
-export const CLUE_FIRST_DM = 'C01';
-export const CLUE_MEMO_APP = 'C17';
-export const CLUE_REMIT = 'C19';
-export const ENDING_A0 = 'A-0';
+export const CLUE_FIRST_DM = "C01";
+export const CLUE_MEMO_APP = "C17";
+export const CLUE_REMIT = "C19";
+export const ENDING_A0 = "A-0";
 
 export type SanghyukState = {
   openedAt: number | null;
-  choice: 'why' | 'read' | null;
+  choice: "why" | "read" | null;
   answeredAt: number | null;
   ignored: boolean;
   draftErase: number;
@@ -74,7 +74,7 @@ export type RunState = {
   ignores: number;
   clues: string[];
   memoRead: number[];
-  remitStatus: 'open' | 'received' | 'expired';
+  remitStatus: "open" | "received" | "expired";
   sanghyuk: SanghyukState;
   erasedThrice: boolean;
   morning: { erasedThrice: boolean; dndNight: boolean };
@@ -125,7 +125,7 @@ export const DEFAULT_RUN: RunState = {
   ignores: 0,
   clues: [],
   memoRead: [],
-  remitStatus: 'open',
+  remitStatus: "open",
   sanghyuk: { openedAt: null, choice: null, answeredAt: null, ignored: false, draftErase: 0 },
   erasedThrice: false,
   morning: { erasedThrice: false, dndNight: false },
@@ -157,16 +157,25 @@ export const DEFAULT_RUN: RunState = {
 const round1 = (value: number) => Math.round(value * 10) / 10;
 
 export function parseRun(value: unknown): RunState | null {
-  if (typeof value !== 'object' || value === null) return null;
+  if (typeof value !== "object" || value === null) return null;
   const candidate = value as Partial<RunState>;
-  if (typeof candidate.t !== 'number' || typeof candidate.nextWakeT !== 'number' || typeof candidate.day !== 'number') {
+  if (
+    typeof candidate.t !== "number" ||
+    typeof candidate.nextWakeT !== "number" ||
+    typeof candidate.day !== "number"
+  ) {
     return null;
   }
-  if (typeof candidate.battery !== 'number' || !Array.isArray(candidate.clues)) return null;
+  if (typeof candidate.battery !== "number" || !Array.isArray(candidate.clues)) return null;
   return { ...DEFAULT_RUN, ...candidate, viewing: null };
 }
 
-function makeNotice(run: RunState, key: string, at: number, notice: { appId: string; title: string; body: string }): Notice {
+function makeNotice(
+  run: RunState,
+  key: string,
+  at: number,
+  notice: { appId: string; title: string; body: string },
+): Notice {
   return {
     id: `${key}-${at}`,
     appId: notice.appId,
@@ -180,29 +189,43 @@ function makeNotice(run: RunState, key: string, at: number, notice: { appId: str
 
 function applyCrossings(run: RunState, crossings: Crossing[]): RunState {
   return crossings.reduce<RunState>((acc, crossing) => {
-    if (crossing.kind === 'recessStart') {
+    if (crossing.kind === "recessStart") {
       if (isRecessSkipped(acc, crossing.recessIndex)) return acc;
-      return { ...acc, notices: [...acc.notices, makeNotice(acc, `recess${crossing.recessIndex}`, crossing.at, notices.recess)] };
+      return {
+        ...acc,
+        notices: [
+          ...acc.notices,
+          makeNotice(acc, `recess${crossing.recessIndex}`, crossing.at, notices.recess),
+        ],
+      };
     }
-    if (crossing.kind === 'dismissal') {
-      return { ...acc, notices: [...acc.notices, makeNotice(acc, 'dismissal', crossing.at, notices.dismissal)] };
+    if (crossing.kind === "dismissal") {
+      return {
+        ...acc,
+        notices: [...acc.notices, makeNotice(acc, "dismissal", crossing.at, notices.dismissal)],
+      };
     }
     if (acc.nightCutPlayed) return acc;
     return {
       ...acc,
       nightCutPending: true,
-      notices: [...acc.notices, makeNotice(acc, 'tip', crossing.at, notices.tipPost)],
+      notices: [...acc.notices, makeNotice(acc, "tip", crossing.at, notices.tipPost)],
     };
   }, run);
 }
 
 function normalize(run: RunState): RunState {
   let next = run;
-  if (next.remitStatus === 'open' && next.t >= REMIT_EXPIRES_T) {
-    next = { ...next, remitStatus: 'expired' };
+  if (next.remitStatus === "open" && next.t >= REMIT_EXPIRES_T) {
+    next = { ...next, remitStatus: "expired" };
   }
   const { sanghyuk } = next;
-  if (sanghyuk.openedAt !== null && sanghyuk.answeredAt === null && !sanghyuk.ignored && next.t >= sanghyuk.openedAt + DAY_MIN) {
+  if (
+    sanghyuk.openedAt !== null &&
+    sanghyuk.answeredAt === null &&
+    !sanghyuk.ignored &&
+    next.t >= sanghyuk.openedAt + DAY_MIN
+  ) {
     next = {
       ...next,
       ignores: next.ignores + 1,
@@ -210,7 +233,9 @@ function normalize(run: RunState): RunState {
       sanghyuk: { ...sanghyuk, ignored: true },
     };
   }
-  const overdue = Object.keys(next.dmReadAt).filter((threadId) => next.t >= next.dmReadAt[threadId] + DAY_MIN);
+  const overdue = Object.keys(next.dmReadAt).filter(
+    (threadId) => next.t >= next.dmReadAt[threadId] + DAY_MIN,
+  );
   if (overdue.length > 0) {
     const dmReadAt = { ...next.dmReadAt };
     overdue.forEach((threadId) => delete dmReadAt[threadId]);
@@ -218,7 +243,8 @@ function normalize(run: RunState): RunState {
       ...next,
       dmReadAt,
       ignores: next.ignores + overdue.length,
-      mind: next.mind + (next.activityStatus ? effects.ignoredWhileActive.mind * overdue.length : 0),
+      mind:
+        next.mind + (next.activityStatus ? effects.ignoredWhileActive.mind * overdue.length : 0),
     };
   }
   next = { ...next, rumorPeak: Math.max(next.rumorPeak, next.rumor) };
@@ -251,8 +277,17 @@ function wakeUp(run: RunState, extraMinutes: number, shutdownNow: boolean): RunS
 export function advanceRun(run: RunState, minutes: number, batteryCost: number): RunState {
   const target = run.t + minutes;
   const wakeAt = run.nextWakeT;
-  const charged: RunState = { ...run, battery: round1(run.battery - (run.lowPower || run.battery <= LOW_POWER_LINE ? batteryCost * 0.6 : batteryCost)) };
-  const withEvents = applyCrossings(charged, crossingsBetween(run, run.t, Math.min(target, wakeAt)));
+  const charged: RunState = {
+    ...run,
+    battery: round1(
+      run.battery -
+        (run.lowPower || run.battery <= LOW_POWER_LINE ? batteryCost * 0.6 : batteryCost),
+    ),
+  };
+  const withEvents = applyCrossings(
+    charged,
+    crossingsBetween(run, run.t, Math.min(target, wakeAt)),
+  );
   if (withEvents.battery <= 0) return wakeUp({ ...withEvents, t: wakeAt }, 0, true);
   if (target >= wakeAt) return wakeUp({ ...withEvents, t: wakeAt }, target - wakeAt, false);
   return normalize({ ...withEvents, t: target });
@@ -285,7 +320,8 @@ export function openMemoApp(run: RunState): RunState {
 export function readMemo(run: RunState, index: number): RunState {
   if (run.memoRead.includes(index)) return run;
   const next = advanceRun(run, costs.memoRead.minutes, costs.memoRead.battery);
-  const courage = index === MEMO_18_INDEX ? next.courage + effects.memo18Unlock.courage : next.courage;
+  const courage =
+    index === MEMO_18_INDEX ? next.courage + effects.memo18Unlock.courage : next.courage;
   return { ...next, courage, memoRead: [...next.memoRead, index] };
 }
 
@@ -294,9 +330,9 @@ export function addClue(run: RunState, clueId: string): RunState {
 }
 
 export function receiveRemit(run: RunState): RunState {
-  if (run.remitStatus !== 'open') return run;
+  if (run.remitStatus !== "open") return run;
   return addClue(
-    { ...run, remitStatus: 'received', courage: run.courage + effects.remitReceive.courage },
+    { ...run, remitStatus: "received", courage: run.courage + effects.remitReceive.courage },
     CLUE_REMIT,
   );
 }
@@ -307,13 +343,13 @@ export function openSanghyukRoom(run: RunState): RunState {
   return { ...withClue, sanghyuk: { ...withClue.sanghyuk, openedAt: withClue.t } };
 }
 
-export function answerSanghyuk(run: RunState, choice: 'why' | 'read'): RunState {
+export function answerSanghyuk(run: RunState, choice: "why" | "read"): RunState {
   if (run.sanghyuk.answeredAt !== null) return run;
   const next: RunState = {
     ...run,
     sanghyuk: { ...run.sanghyuk, choice, answeredAt: run.t },
   };
-  if (choice === 'why' && !next.codex.includes(ENDING_A0)) {
+  if (choice === "why" && !next.codex.includes(ENDING_A0)) {
     return { ...next, codex: [...next.codex, ENDING_A0] };
   }
   return next;
@@ -352,7 +388,7 @@ export function setSoundOn(run: RunState, soundOn: boolean): RunState {
   return { ...run, soundOn };
 }
 
-export function captureScreen(run: RunState, capture: Omit<Capture, 't'>): RunState {
+export function captureScreen(run: RunState, capture: Omit<Capture, "t">): RunState {
   const passed = advanceRun(run, CAPTURE_MINUTES, CAPTURE_BATTERY);
   return { ...passed, captures: pushCapture(passed.captures, { ...capture, t: passed.t }) };
 }
@@ -362,21 +398,35 @@ export function markNightCutPlayed(run: RunState): RunState {
 }
 
 export function clearNotifications(run: RunState): RunState {
-  return { ...run, seenNotices: [...run.seenNotices, ...run.notices.map((n) => n.id)], notices: [], notificationsCleared: true };
+  return {
+    ...run,
+    seenNotices: [...run.seenNotices, ...run.notices.map((n) => n.id)],
+    notices: [],
+    notificationsCleared: true,
+  };
 }
 
 export function openDmThread(run: RunState, threadId: string, hasUnread: boolean): RunState {
   const opened = openDm(run);
   const dmReadAt =
-    hasUnread && opened.dmReadAt[threadId] === undefined ? { ...opened.dmReadAt, [threadId]: opened.t } : opened.dmReadAt;
+    hasUnread && opened.dmReadAt[threadId] === undefined
+      ? { ...opened.dmReadAt, [threadId]: opened.t }
+      : opened.dmReadAt;
   return { ...viewThread(opened, threadId), dmReadAt };
 }
 
 /** Marks a chat as on-screen: its notices are cleared and remembered as seen. */
 export function viewThread(run: RunState, threadId: string): RunState {
-  const gone = run.notices.filter((notice) => notice.threadId === threadId).map((notice) => notice.id);
+  const gone = run.notices
+    .filter((notice) => notice.threadId === threadId)
+    .map((notice) => notice.id);
   const seen = Array.from(new Set([...run.seenNotices, ...gone, `open:${threadId}`]));
-  return { ...run, viewing: threadId, seenNotices: seen, notices: run.notices.filter((notice) => notice.threadId !== threadId) };
+  return {
+    ...run,
+    viewing: threadId,
+    seenNotices: seen,
+    notices: run.notices.filter((notice) => notice.threadId !== threadId),
+  };
 }
 
 export function markNoticesSeen(run: RunState, ids: string[]): RunState {
@@ -385,7 +435,9 @@ export function markNoticesSeen(run: RunState, ids: string[]): RunState {
 }
 
 export function setAppFlag(run: RunState, key: string, value: string): RunState {
-  return run.appFlags[key] === value ? run : { ...run, appFlags: { ...run.appFlags, [key]: value } };
+  return run.appFlags[key] === value
+    ? run
+    : { ...run, appFlags: { ...run.appFlags, [key]: value } };
 }
 
 export function leaveThread(run: RunState): RunState {
@@ -410,21 +462,26 @@ export function settleNotices(run: RunState): RunState {
     return true;
   });
   if (!changed) return run;
-  return { ...run, notices, seenNotices: fresh.length ? [...run.seenNotices, ...fresh] : run.seenNotices };
+  return {
+    ...run,
+    notices,
+    seenNotices: fresh.length ? [...run.seenNotices, ...fresh] : run.seenNotices,
+  };
 }
 
 export function arriveDmNotice(
   run: RunState,
   notice: { id: string; threadId: string; title: string; body: string; at: number },
 ): RunState {
-  if (run.notices.some((item) => item.id === notice.id) || run.seenNotices.includes(notice.id)) return run;
+  if (run.notices.some((item) => item.id === notice.id) || run.seenNotices.includes(notice.id))
+    return run;
   return {
     ...run,
     notices: [
       ...run.notices,
       {
         id: notice.id,
-        appId: 'insta',
+        appId: "insta",
         title: notice.title,
         body: notice.body,
         time: clockOf(notice.at),
@@ -439,13 +496,20 @@ export function arriveDmNotice(
 export function releaseOneNotice(run: RunState): RunState {
   const index = run.notices.findIndex((notice) => notice.queued);
   if (index < 0) return run;
-  return { ...run, notices: run.notices.map((notice, i) => (i === index ? { ...notice, queued: false } : notice)) };
+  return {
+    ...run,
+    notices: run.notices.map((notice, i) => (i === index ? { ...notice, queued: false } : notice)),
+  };
 }
 
 export function answerCall(run: RunState): RunState {
   const call = incomingCall(run);
   if (!call || run.battery < CALL_MIN_BATTERY) return run;
-  return { ...run, activeCall: { id: call.id, step: 0, picks: [] }, callsDone: [...run.callsDone, call.id] };
+  return {
+    ...run,
+    activeCall: { id: call.id, step: 0, picks: [] },
+    callsDone: [...run.callsDone, call.id],
+  };
 }
 
 export function declineCall(run: RunState): RunState {
@@ -492,8 +556,8 @@ export function stepCall(run: RunState, choice: number | null): RunState {
   if (!call || !step) return run;
 
   let picked: CallChoice | null = null;
-  if (step.type === 'choose') {
-    picked = choice === null ? null : step.options[choice] ?? null;
+  if (step.type === "choose") {
+    picked = choice === null ? null : (step.options[choice] ?? null);
     if (!picked) return run;
   }
   if (run.battery - CALL_STEP_BATTERY <= 0) return dropCall(run);
@@ -508,11 +572,18 @@ export function stepCall(run: RunState, choice: number | null): RunState {
     : run;
   const advanced = advanceRun(withEffects, CALL_STEP_MIN, CALL_STEP_BATTERY);
   const nextIndex = active.step + 1;
-  const ended = nextIndex >= (call.steps?.length ?? 0) || advanced.booted || advanced.day !== run.day;
-  return { ...advanced, activeCall: ended ? null : { ...withEffects.activeCall ?? active, step: nextIndex } };
+  const ended =
+    nextIndex >= (call.steps?.length ?? 0) || advanced.booted || advanced.day !== run.day;
+  return {
+    ...advanced,
+    activeCall: ended ? null : { ...(withEffects.activeCall ?? active), step: nextIndex },
+  };
 }
 
-export function applyDmEffects(run: RunState, delta: { trust: number; courage: number; rumor: number }): RunState {
+export function applyDmEffects(
+  run: RunState,
+  delta: { trust: number; courage: number; rumor: number },
+): RunState {
   return {
     ...run,
     mind: clampStat(run.mind + delta.trust),

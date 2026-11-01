@@ -39,20 +39,20 @@ export const PERSONAS: Record<string, string> = {
 
 // AI 호출이 실패했을 때 대신 보내는 고정 대사입니다.
 export const BACKUP_LINES: Record<string, string[]> = {
-  sanghyuk: ['…', '잠깐만', '나중에 말할게', '그냥 그렇다고', 'ㅋㅋ 아니다 됐다'],
-  donghyun: ['아 잠만 나 급식 줄', 'ㅋㅋㅋ 인정', '근데 형이 뭐라 했는데', '아 몰라 일단 답장해'],
-  jaehyun: ['지금 회의 중이라 이따 답할게', '확인했다', '정리해서 말해 줄게'],
-  seongho: ['확인했다', '용건만.', '나중에.'],
+  sanghyuk: ["…", "잠깐만", "나중에 말할게", "그냥 그렇다고", "ㅋㅋ 아니다 됐다"],
+  donghyun: ["아 잠만 나 급식 줄", "ㅋㅋㅋ 인정", "근데 형이 뭐라 했는데", "아 몰라 일단 답장해"],
+  jaehyun: ["지금 회의 중이라 이따 답할게", "확인했다", "정리해서 말해 줄게"],
+  seongho: ["확인했다", "용건만.", "나중에."],
 };
 
 // 이 단어가 태산의 메시지에 나오면 AI를 부르지 않고 "그런 얘기는 안 해"로 넘깁니다.
 export const BLOCKED_TOPIC_PATTERN = /성관계|섹스|야한|야동|자해|죽고\s?싶|죽을래|죽여|때릴|때려/;
-export const BLOCKED_REPLY = '그런 얘기는 안 해';
+export const BLOCKED_REPLY = "그런 얘기는 안 해";
 
 // AI가 답장에서 공개해도 되는 단서 ID 목록입니다. 아직 정하지 않아 비어 있습니다.
 export const REVEALABLE_CLUES: Record<string, string[]> = {
-  sanghyuk: ['C01', 'C02', 'C03', 'C04', 'C05', 'C14', 'C15', 'C18', 'C19', 'C23', 'C24'],
-  donghyun: ['C09', 'C10', 'C11', 'C12'],
-  jaehyun: ['C07', 'C08', 'C11', 'C12', 'C13'],
-  seongho: ['C06', 'C07', 'C08', 'C21'],
+  sanghyuk: ["C01", "C02", "C03", "C04", "C05", "C14", "C15", "C18", "C19", "C23", "C24"],
+  donghyun: ["C09", "C10", "C11", "C12"],
+  jaehyun: ["C07", "C08", "C11", "C12", "C13"],
+  seongho: ["C06", "C07", "C08", "C21"],
 };

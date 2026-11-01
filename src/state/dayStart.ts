@@ -1,5 +1,5 @@
-import { schedule } from '@/data/story/schedule';
-import { clockOf, type Notice } from '@/state/timeline';
+import { schedule } from "@/data/story/schedule";
+import { clockOf, type Notice } from "@/state/timeline";
 
 export function onDayStart(day: number, at: number): Notice[] {
   return schedule

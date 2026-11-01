@@ -1,4 +1,4 @@
-import { BatteryLow } from 'lucide-react';
+import { BatteryLow } from "lucide-react";
 
 type Props = { onCharge: () => void };
 

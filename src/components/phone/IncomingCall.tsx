@@ -1,5 +1,5 @@
-import { Phone, PhoneOff } from 'lucide-react';
-import type { CallScript } from '@/state/calls';
+import { Phone, PhoneOff } from "lucide-react";
+import type { CallScript } from "@/state/calls";
 
 type Props = {
   call: CallScript;
@@ -37,7 +37,7 @@ export default function IncomingCall({ call, canAnswer, onAnswer, onDecline }: P
           >
             <Phone size={28} strokeWidth={2} aria-hidden="true" />
           </button>
-          <span className="text-[13px] text-white/70">{canAnswer ? '받기' : '배터리 부족'}</span>
+          <span className="text-[13px] text-white/70">{canAnswer ? "받기" : "배터리 부족"}</span>
         </div>
       </div>
     </div>

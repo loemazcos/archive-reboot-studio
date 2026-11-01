@@ -1,8 +1,8 @@
-import { addClue, advanceRun, type RunState } from '@/state/runState';
-import { dayIndex, SUB_ACCOUNT_DAY } from '@/state/social';
-import { DAY_MIN, RECESS_STARTS, clockOf, dayStartOf, type Notice } from '@/state/timeline';
-import { costs } from '@/data/story/costs';
-import { tipline } from '@/data/story/tipline';
+import { addClue, advanceRun, type RunState } from "@/state/runState";
+import { dayIndex, SUB_ACCOUNT_DAY } from "@/state/social";
+import { DAY_MIN, RECESS_STARTS, clockOf, dayStartOf, type Notice } from "@/state/timeline";
+import { costs } from "@/data/story/costs";
+import { tipline } from "@/data/story/tipline";
 
 const clamp = (value: number) => Math.min(100, Math.max(0, value));
 
@@ -26,16 +26,20 @@ export function toggleSave(run: RunState, postId: string): RunState {
 
 export function setComment(run: RunState, postId: string, text: string): RunState {
   if (run.social.comments[postId]) return run;
-  return { ...run, social: { ...run.social, comments: { ...run.social.comments, [postId]: text } } };
+  return {
+    ...run,
+    social: { ...run.social, comments: { ...run.social.comments, [postId]: text } },
+  };
 }
 
-export function setAccount(run: RunState, account: 'main' | 'sub'): RunState {
-  if (account === 'sub' && dayIndex(run.t) < SUB_ACCOUNT_DAY) return run;
+export function setAccount(run: RunState, account: "main" | "sub"): RunState {
+  if (account === "sub" && dayIndex(run.t) < SUB_ACCOUNT_DAY) return run;
   return { ...run, social: { ...run.social, account } };
 }
 
-export function heartStory(run: RunState, account: 'main' | 'sub'): RunState {
-  const subHeartDay = account === 'sub' && run.social.subHeartDay === null ? dayIndex(run.t) : run.social.subHeartDay;
+export function heartStory(run: RunState, account: "main" | "sub"): RunState {
+  const subHeartDay =
+    account === "sub" && run.social.subHeartDay === null ? dayIndex(run.t) : run.social.subHeartDay;
   return {
     ...run,
     courage: clamp(run.courage + 2),
@@ -50,7 +54,9 @@ export function watchReels(run: RunState): RunState {
 
 function nextRecessAt(run: RunState): number {
   const start = dayStartOf(run);
-  const candidates = [0, 1].flatMap((day) => RECESS_STARTS.map((offset) => start + day * DAY_MIN + offset));
+  const candidates = [0, 1].flatMap((day) =>
+    RECESS_STARTS.map((offset) => start + day * DAY_MIN + offset),
+  );
   return candidates.find((at) => at > run.t) ?? run.t + 1;
 }
 
@@ -62,7 +68,7 @@ export function submitTipline(run: RunState, choiceId: string, roll: number): Ru
   const next = advanceRun(run, tipline.cost.minutes, tipline.cost.battery);
   const social = { ...next.social, tiplineDay: today };
 
-  if (choice.id === 'correct' && choice.backfire && roll < choice.backfire.chance) {
+  if (choice.id === "correct" && choice.backfire && roll < choice.backfire.chance) {
     return {
       ...next,
       rumor: clamp(next.rumor + choice.backfire.delta),
@@ -71,11 +77,11 @@ export function submitTipline(run: RunState, choiceId: string, roll: number): Ru
   }
 
   const rumor = clamp(next.rumor + choice.delta);
-  if (choice.id === 'reveal' && choice.followUp) {
+  if (choice.id === "reveal" && choice.followUp) {
     const arriveAt = nextRecessAt(next);
     const notice: Notice = {
       id: `tip-followup-${today}`,
-      appId: 'kakao',
+      appId: "kakao",
       title: choice.followUp.title,
       body: choice.followUp.text,
       time: clockOf(arriveAt),

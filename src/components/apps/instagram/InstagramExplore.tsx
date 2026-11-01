@@ -1,28 +1,27 @@
-import { useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
-import Avatar from '@/components/apps/Avatar';
-import type { PostData } from '@/components/apps/instagram/PostCard';
-import { useGameState } from '@/state/GameState';
-import { dayIndex, RUMOR_HANDLE, SANGHYUK_HANDLE, SUB_HANDLE } from '@/state/social';
-import { posts as postData } from '@/data/instagram';
+import { useMemo, useState } from "react";
+import { Search } from "lucide-react";
+import Avatar from "@/components/apps/Avatar";
+import type { PostData } from "@/components/apps/instagram/PostCard";
+import { useGameState } from "@/state/GameState";
+import { dayIndex, RUMOR_HANDLE, SANGHYUK_HANDLE, SUB_HANDLE } from "@/state/social";
+import { posts as postData } from "@/data/instagram";
 
 const posts = postData as PostData[];
 const ACCEPT_DAY = 4;
 const EXPLORE_PHOTOS = [
-  'https://i.postimg.cc/KknxbKsV/1.jpg',
-  'https://i.postimg.cc/hQsnJkn9/10.jpg',
-  'https://i.postimg.cc/xN5QkwQL/11.jpg',
-  'https://i.postimg.cc/m1j4cv4H/12.jpg',
-  'https://i.postimg.cc/kRq9gn0P/2.jpg',
-  'https://i.postimg.cc/1VsP39kh/3.jpg',
-  'https://i.postimg.cc/Lg2R8HcH/4.jpg',
-  'https://i.postimg.cc/tnpy4XKy/5.jpg',
-  'https://i.postimg.cc/YLMkCp52/6.jpg',
-  'https://i.postimg.cc/XB43YVR4/7.jpg',
-  'https://i.postimg.cc/rRMcw8Bp/8.jpg',
-  'https://i.postimg.cc/xN5QkwQk/9.jpg',
+  "https://i.postimg.cc/KknxbKsV/1.jpg",
+  "https://i.postimg.cc/hQsnJkn9/10.jpg",
+  "https://i.postimg.cc/xN5QkwQL/11.jpg",
+  "https://i.postimg.cc/m1j4cv4H/12.jpg",
+  "https://i.postimg.cc/kRq9gn0P/2.jpg",
+  "https://i.postimg.cc/1VsP39kh/3.jpg",
+  "https://i.postimg.cc/Lg2R8HcH/4.jpg",
+  "https://i.postimg.cc/tnpy4XKy/5.jpg",
+  "https://i.postimg.cc/YLMkCp52/6.jpg",
+  "https://i.postimg.cc/XB43YVR4/7.jpg",
+  "https://i.postimg.cc/rRMcw8Bp/8.jpg",
+  "https://i.postimg.cc/xN5QkwQk/9.jpg",
 ];
-
 
 type Props = {
   onOpenRumor: () => void;
@@ -30,19 +29,22 @@ type Props = {
 
 export default function InstagramExplore({ onOpenRumor }: Props) {
   const { run } = useGameState();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const term = query.trim().toLowerCase();
 
   const accounts = useMemo(() => {
     const handles = Array.from(new Set(posts.map((post) => post.handle)));
     return handles.map((handle) => {
       const sample = posts.find((post) => post.handle === handle);
-      return { handle, avatar: sample?.avatar ?? null, place: sample?.place ?? '' };
+      return { handle, avatar: sample?.avatar ?? null, place: sample?.place ?? "" };
     });
   }, []);
 
   const hashtags = useMemo(
-    () => Array.from(new Set(posts.map((post) => post.place).filter(Boolean))).map((place) => `#${place}`),
+    () =>
+      Array.from(new Set(posts.map((post) => post.place).filter(Boolean))).map(
+        (place) => `#${place}`,
+      ),
     [],
   );
 
@@ -83,7 +85,9 @@ export default function InstagramExplore({ onOpenRumor }: Props) {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[14px] font-semibold">{account.handle}</p>
                   {account.handle === SUB_HANDLE && accepted && (
-                    <p className="text-[11px] text-[var(--fg-2)]">{SANGHYUK_HANDLE}님이 팔로우 요청을 수락했습니다</p>
+                    <p className="text-[11px] text-[var(--fg-2)]">
+                      {SANGHYUK_HANDLE}님이 팔로우 요청을 수락했습니다
+                    </p>
                   )}
                 </div>
               </button>
@@ -91,7 +95,9 @@ export default function InstagramExplore({ onOpenRumor }: Props) {
           ))}
           {matchedTags.map((tag) => (
             <li key={tag} className="flex items-center gap-3 py-2.5 text-[14px] font-semibold">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--card)]">#</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--card)]">
+                #
+              </span>
               {tag}
             </li>
           ))}
@@ -102,38 +108,43 @@ export default function InstagramExplore({ onOpenRumor }: Props) {
       ) : (
         <div className="pan-y-scroll grid flex-1 grid-cols-3 gap-0.5 overflow-y-auto">
           {posts.map((post, index) => {
-            const photoIndex = posts.slice(0, index).filter((item) => item.kind !== 'notice').length;
-            const photo = post.kind === 'notice' ? null : EXPLORE_PHOTOS[photoIndex % EXPLORE_PHOTOS.length];
+            const photoIndex = posts
+              .slice(0, index)
+              .filter((item) => item.kind !== "notice").length;
+            const photo =
+              post.kind === "notice" ? null : EXPLORE_PHOTOS[photoIndex % EXPLORE_PHOTOS.length];
             return (
-            <button
-              key={post.id}
-              type="button"
-              onClick={() => openPost(post)}
-              aria-label={`${post.handle} 게시물`}
-              className="relative aspect-square overflow-hidden transition-opacity active:opacity-80"
-              style={{
-                backgroundImage: photo
-                  ? `url(${photo})`
-                  : `linear-gradient(160deg, ${post.tone[0]}, ${post.tone[1]})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
-            >
-              {post.kind === 'notice' && (
-                <span className="absolute inset-0 flex items-center justify-center p-2 text-center text-[10px] leading-[1.4] text-white">
-                  {post.caption.slice(0, 40)}
-                </span>
-              )}
-            </button>
+              <button
+                key={post.id}
+                type="button"
+                onClick={() => openPost(post)}
+                aria-label={`${post.handle} 게시물`}
+                className="relative aspect-square overflow-hidden transition-opacity active:opacity-80"
+                style={{
+                  backgroundImage: photo
+                    ? `url(${photo})`
+                    : `linear-gradient(160deg, ${post.tone[0]}, ${post.tone[1]})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                {post.kind === "notice" && (
+                  <span className="absolute inset-0 flex items-center justify-center p-2 text-center text-[10px] leading-[1.4] text-white">
+                    {post.caption.slice(0, 40)}
+                  </span>
+                )}
+              </button>
             );
           })}
-          {EXPLORE_PHOTOS.slice(posts.filter((item) => item.kind !== 'notice').length).map((photo) => (
-            <span
-              key={photo}
-              className="relative aspect-square overflow-hidden bg-cover bg-center"
-              style={{ backgroundImage: `url(${photo})` }}
-            />
-          ))}
+          {EXPLORE_PHOTOS.slice(posts.filter((item) => item.kind !== "notice").length).map(
+            (photo) => (
+              <span
+                key={photo}
+                className="relative aspect-square overflow-hidden bg-cover bg-center"
+                style={{ backgroundImage: `url(${photo})` }}
+              />
+            ),
+          )}
         </div>
       )}
     </div>

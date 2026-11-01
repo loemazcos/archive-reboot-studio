@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, type ReactNode } from "react";
 
 export type ScreenSnapshot = { screen: string; title: string; lines: string[] };
 
@@ -12,7 +12,7 @@ export function ScreenReportProvider({ value, children }: { value: Report; child
 
 export function useReportScreen(snapshot: ScreenSnapshot | null) {
   const report = useContext(ScreenReportContext);
-  const key = snapshot ? JSON.stringify(snapshot) : '';
+  const key = snapshot ? JSON.stringify(snapshot) : "";
 
   useEffect(() => {
     report(key ? (JSON.parse(key) as ScreenSnapshot) : null);

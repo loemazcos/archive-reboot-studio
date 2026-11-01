@@ -1,9 +1,9 @@
-const DEVICE_ID_KEY = 'taesan-device-id';
-const NAME_KEY = 'taesan-player-name';
+const DEVICE_ID_KEY = "taesan-device-id";
+const NAME_KEY = "taesan-player-name";
 
 /** Save slot id for the signed-in player name. Only set after the name screen. */
 export function getDeviceId(): string {
-  return window.localStorage.getItem(DEVICE_ID_KEY) ?? '';
+  return window.localStorage.getItem(DEVICE_ID_KEY) ?? "";
 }
 
 export function getPlayerName(): string | null {

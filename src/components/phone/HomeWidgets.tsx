@@ -1,5 +1,5 @@
-import { device } from '@/data/device';
-import { formatClock, formatLockDate } from '@/lib/gameTime';
+import { device } from "@/data/device";
+import { formatClock, formatLockDate } from "@/lib/gameTime";
 
 type Props = { now: Date };
 
@@ -10,7 +10,9 @@ export default function HomeWidgets({ now }: Props) {
       <div className="col-span-2 flex items-center justify-between rounded-[22px] bg-[var(--card)] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
         <div>
           <p className="text-[13px] text-[var(--fg-2)]">{formatLockDate(now)}</p>
-          <p className="mt-1 text-[44px] font-light leading-none tracking-[-1px] tabular-nums">{formatClock(now)}</p>
+          <p className="mt-1 text-[44px] font-light leading-none tracking-[-1px] tabular-nums">
+            {formatClock(now)}
+          </p>
         </div>
       </div>
       <div className="col-span-2 flex items-center justify-between rounded-[22px] bg-[var(--card)] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
@@ -20,7 +22,7 @@ export default function HomeWidgets({ now }: Props) {
       <div className="col-span-2 flex items-center justify-between rounded-[22px] bg-[var(--card)] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
         <p className="text-[13px] text-[var(--fg-2)]">오늘 걸음</p>
         <p className="text-[26px] font-semibold tabular-nums">
-          {steps.toLocaleString('ko-KR')}
+          {steps.toLocaleString("ko-KR")}
           <span className="ml-1 text-[13px] font-normal text-[var(--fg-2)]">걸음</span>
         </p>
       </div>

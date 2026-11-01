@@ -1,9 +1,9 @@
-import { useEffect, useState, type CSSProperties } from 'react';
-import Phone from '@/components/phone/Phone';
-import NameScreen from '@/components/NameScreen';
-import { usePhoneScale } from '@/hooks/usePhoneScale';
-import { getDeviceId, getPlayerName } from '@/lib/device';
-import { GameStateProvider } from '@/state/GameState';
+import { useEffect, useState, type CSSProperties } from "react";
+import Phone from "@/components/phone/Phone";
+import NameScreen from "@/components/NameScreen";
+import { usePhoneScale } from "@/hooks/usePhoneScale";
+import { getDeviceId, getPlayerName } from "@/lib/device";
+import { GameStateProvider } from "@/state/GameState";
 
 function App() {
   const scale = usePhoneScale();
@@ -18,7 +18,7 @@ function App() {
 
   return (
     <GameStateProvider key={name}>
-      <div className="phone-stage" style={{ '--phone-scale': scale } as CSSProperties}>
+      <div className="phone-stage" style={{ "--phone-scale": scale } as CSSProperties}>
         <Phone />
       </div>
     </GameStateProvider>

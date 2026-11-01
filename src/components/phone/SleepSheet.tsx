@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Moon, Plug, X } from 'lucide-react';
+import { useState } from "react";
+import { Moon, Plug, X } from "lucide-react";
 
 type Props = {
   question: string;
@@ -10,8 +10,8 @@ type Props = {
 };
 
 const OPTIONS = [
-  { charging: true, label: '충전기 꽂고 자기', hint: '아침 배터리 100%' },
-  { charging: false, label: '충전기 없이 자기', hint: '아침 배터리 -10%' },
+  { charging: true, label: "충전기 꽂고 자기", hint: "아침 배터리 100%" },
+  { charging: false, label: "충전기 없이 자기", hint: "아침 배터리 -10%" },
 ] as const;
 
 export default function SleepSheet({ question, clueCount, ignores, onSleep, onClose }: Props) {
@@ -25,7 +25,12 @@ export default function SleepSheet({ question, clueCount, ignores, onSleep, onCl
             <Moon size={18} strokeWidth={1.8} aria-hidden="true" />
             잠들기
           </p>
-          <button type="button" onClick={onClose} aria-label="닫기" className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--card)]">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="닫기"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--card)]"
+          >
             <X size={18} strokeWidth={2} aria-hidden="true" />
           </button>
         </div>
@@ -48,7 +53,9 @@ export default function SleepSheet({ question, clueCount, ignores, onSleep, onCl
               aria-pressed={charging === option.charging}
               onClick={() => setCharging(option.charging)}
               className={`flex items-center gap-3 rounded-[18px] p-3.5 text-left transition-colors ${
-                charging === option.charging ? 'bg-[var(--accent)] text-white' : 'bg-[var(--card)] text-[var(--fg)]'
+                charging === option.charging
+                  ? "bg-[var(--accent)] text-white"
+                  : "bg-[var(--card)] text-[var(--fg)]"
               }`}
             >
               <Plug size={18} strokeWidth={1.8} aria-hidden="true" />

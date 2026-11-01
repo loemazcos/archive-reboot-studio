@@ -1,12 +1,12 @@
-import { useRef, useState, type PointerEvent } from 'react';
-import AppGlyph from '@/components/phone/AppGlyph';
-import type { AppConfig } from '@/lib/types';
+import { useRef, useState, type PointerEvent } from "react";
+import AppGlyph from "@/components/phone/AppGlyph";
+import type { AppConfig } from "@/lib/types";
 
 const CARD_WIDTH = 240;
 const CARD_GAP = 16;
 const STEP = CARD_WIDTH + CARD_GAP;
 const DRAG_START_PX = 8;
-const SPRING = 'cubic-bezier(0.32, 0.72, 0, 1)';
+const SPRING = "cubic-bezier(0.32, 0.72, 0, 1)";
 
 type Props = {
   apps: AppConfig[];
@@ -58,9 +58,7 @@ export default function AppSwitcher({ apps, onResume, onClose }: Props) {
       {apps.length === 0 ? (
         <p className="text-center text-[15px] text-white">최근에 연 앱이 없어요</p>
       ) : (
-        <div
-          className="relative h-[460px] w-full"
-        >
+        <div className="relative h-[460px] w-full">
           {apps.map((app, position) => (
             <button
               key={app.id}
@@ -74,7 +72,7 @@ export default function AppSwitcher({ apps, onResume, onClose }: Props) {
                 width: CARD_WIDTH,
                 left: `calc(50% - ${CARD_WIDTH / 2}px)`,
                 transform: `translate3d(${(position - current) * STEP + dragX}px, 0, 0) scale(${position === current ? 1 : 0.92})`,
-                transition: dragX === 0 ? `transform 450ms ${SPRING}` : 'none',
+                transition: dragX === 0 ? `transform 450ms ${SPRING}` : "none",
               }}
             >
               <span className="flex items-center gap-2.5 px-4 py-3 text-[var(--fg)]">
@@ -83,7 +81,9 @@ export default function AppSwitcher({ apps, onResume, onClose }: Props) {
               </span>
               <span
                 className="flex flex-1 items-center justify-center"
-                style={{ backgroundImage: `linear-gradient(180deg, ${app.colors[0]}, ${app.colors[1]})` }}
+                style={{
+                  backgroundImage: `linear-gradient(180deg, ${app.colors[0]}, ${app.colors[1]})`,
+                }}
               >
                 <AppGlyph app={app} size={96} />
               </span>
@@ -91,7 +91,9 @@ export default function AppSwitcher({ apps, onResume, onClose }: Props) {
           ))}
         </div>
       )}
-      <p className="mt-4 text-center text-[13px] text-white/80">옆 카드를 눌러 고르고, 빈 곳을 누르면 닫혀요</p>
+      <p className="mt-4 text-center text-[13px] text-white/80">
+        옆 카드를 눌러 고르고, 빈 곳을 누르면 닫혀요
+      </p>
     </div>
   );
 }

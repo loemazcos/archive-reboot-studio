@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react';
-import { ChevronLeft, Lock, Plus, Trash2 } from 'lucide-react';
-import { LOCKED_MEMO_OPENS_ON_DAY, memo18Text, memos } from '@/data/story/memos';
-import { useGameState } from '@/state/GameState';
-import { MEMO_18_INDEX, openMemoApp, readMemo } from '@/state/runState';
+import { useEffect, useState } from "react";
+import { ChevronLeft, Lock, Plus, Trash2 } from "lucide-react";
+import { LOCKED_MEMO_OPENS_ON_DAY, memo18Text, memos } from "@/data/story/memos";
+import { useGameState } from "@/state/GameState";
+import { MEMO_18_INDEX, openMemoApp, readMemo } from "@/state/runState";
 
 const MEMO_TOTAL = memos.length;
-const KEY = 'memo.entries';
+const KEY = "memo.entries";
 type MemoEntry = { id: string; text: string; updatedAt: number };
 
 function readEntries(flags: Record<string, string>): MemoEntry[] {
   try {
-    const v = JSON.parse(flags[KEY] ?? '[]');
+    const v = JSON.parse(flags[KEY] ?? "[]");
     return Array.isArray(v) ? v : [];
   } catch {
     return [];
@@ -24,7 +24,10 @@ export default function MemoApp() {
   const mine = readEntries(run.appFlags);
 
   function saveEntries(fn: (list: MemoEntry[]) => MemoEntry[]) {
-    update((current) => ({ ...current, appFlags: { ...current.appFlags, [KEY]: JSON.stringify(fn(readEntries(current.appFlags))) } }));
+    update((current) => ({
+      ...current,
+      appFlags: { ...current.appFlags, [KEY]: JSON.stringify(fn(readEntries(current.appFlags))) },
+    }));
   }
   function saveEdit() {
     if (!editing) return;
@@ -32,7 +35,9 @@ export default function MemoApp() {
     const id = editing.id;
     if (text) {
       saveEntries((list) =>
-        id ? list.map((m) => (m.id === id ? { ...m, text, updatedAt: Date.now() } : m)) : [{ id: crypto.randomUUID(), text, updatedAt: Date.now() }, ...list],
+        id
+          ? list.map((m) => (m.id === id ? { ...m, text, updatedAt: Date.now() } : m))
+          : [{ id: crypto.randomUUID(), text, updatedAt: Date.now() }, ...list],
       );
     }
     setEditing(null);
@@ -42,7 +47,9 @@ export default function MemoApp() {
     update(openMemoApp);
   }, [update]);
 
-  const allRead = Array.from({ length: MEMO_TOTAL }, (_, index) => index).every((index) => run.memoRead.includes(index));
+  const allRead = Array.from({ length: MEMO_TOTAL }, (_, index) => index).every((index) =>
+    run.memoRead.includes(index),
+  );
   const memo18Unlocked = allRead && run.day >= LOCKED_MEMO_OPENS_ON_DAY;
 
   function openMemo(index: number) {
@@ -55,14 +62,22 @@ export default function MemoApp() {
     return (
       <div className="flex h-full flex-col bg-[var(--bg)] text-[var(--fg)]">
         <header className="flex items-center gap-2 px-3 pb-3 pt-[calc(env(safe-area-inset-top)+58px)]">
-          <button type="button" onClick={() => setEditing(null)} className="px-1 text-[15px] text-[var(--accent)]">취소</button>
-          <p className="flex-1 text-center text-[15px] font-semibold">{editing.id ? '메모 수정' : '새 메모'}</p>
+          <button
+            type="button"
+            onClick={() => setEditing(null)}
+            className="px-1 text-[15px] text-[var(--accent)]"
+          >
+            취소
+          </button>
+          <p className="flex-1 text-center text-[15px] font-semibold">
+            {editing.id ? "메모 수정" : "새 메모"}
+          </p>
           {editing.id ? (
             <button
               type="button"
               aria-label="삭제"
               onClick={() => {
-                if (!window.confirm('이 메모를 삭제할까요?')) return;
+                if (!window.confirm("이 메모를 삭제할까요?")) return;
                 const id = editing.id;
                 saveEntries((list) => list.filter((m) => m.id !== id));
                 setEditing(null);
@@ -72,7 +87,13 @@ export default function MemoApp() {
               <Trash2 size={18} aria-hidden="true" />
             </button>
           ) : null}
-          <button type="button" onClick={saveEdit} className="px-1 text-[15px] font-semibold text-[var(--accent)]">저장</button>
+          <button
+            type="button"
+            onClick={saveEdit}
+            className="px-1 text-[15px] font-semibold text-[var(--accent)]"
+          >
+            저장
+          </button>
         </header>
         <textarea
           autoFocus
@@ -87,11 +108,16 @@ export default function MemoApp() {
 
   if (openIndex !== null) {
     const isMemo18 = openIndex === MEMO_18_INDEX;
-    const memo = isMemo18 ? { date: '', text: memo18Text } : memos[openIndex];
+    const memo = isMemo18 ? { date: "", text: memo18Text } : memos[openIndex];
     return (
       <div className="flex h-full flex-col bg-[var(--bg)] text-[var(--fg)]">
         <header className="flex items-center gap-2 px-3 pb-3 pt-[calc(env(safe-area-inset-top)+58px)]">
-          <button type="button" onClick={() => setOpenIndex(null)} aria-label="목록으로" className="p-1 text-[var(--accent)]">
+          <button
+            type="button"
+            onClick={() => setOpenIndex(null)}
+            aria-label="목록으로"
+            className="p-1 text-[var(--accent)]"
+          >
             <ChevronLeft size={26} strokeWidth={2} aria-hidden="true" />
           </button>
           <p className="flex-1 text-center text-[15px] font-semibold">메모</p>
@@ -110,7 +136,12 @@ export default function MemoApp() {
       <header className="px-4 pb-3 pt-[calc(env(safe-area-inset-top)+58px)]">
         <div className="flex items-center justify-between">
           <p className="text-[26px] font-bold leading-[1.2]">메모</p>
-          <button type="button" aria-label="새 메모" onClick={() => setEditing({ id: null, text: '' })} className="p-1 text-[var(--accent)]">
+          <button
+            type="button"
+            aria-label="새 메모"
+            onClick={() => setEditing({ id: null, text: "" })}
+            className="p-1 text-[var(--accent)]"
+          >
             <Plus size={24} aria-hidden="true" />
           </button>
         </div>
@@ -139,7 +170,12 @@ export default function MemoApp() {
               >
                 <span className="flex items-center gap-2 text-[11px] text-[var(--fg-2)]">
                   {memo.date}
-                  {read ? null : <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-label="읽지 않음" />}
+                  {read ? null : (
+                    <span
+                      className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]"
+                      aria-label="읽지 않음"
+                    />
+                  )}
                 </span>
                 <span className="truncate text-[14px]">{memo.text}</span>
               </button>
@@ -158,7 +194,9 @@ export default function MemoApp() {
             ) : (
               <>
                 <Lock size={14} strokeWidth={2} className="text-[var(--fg-2)]" aria-hidden="true" />
-                <span className="text-[14px] text-[var(--fg-2)]">메모 {MEMO_TOTAL}개를 모두 읽으면 열려요</span>
+                <span className="text-[14px] text-[var(--fg-2)]">
+                  메모 {MEMO_TOTAL}개를 모두 읽으면 열려요
+                </span>
               </>
             )}
           </button>

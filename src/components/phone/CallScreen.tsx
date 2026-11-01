@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { PhoneOff } from 'lucide-react';
-import type { CallScript } from '@/state/calls';
+import { useEffect } from "react";
+import { PhoneOff } from "lucide-react";
+import type { CallScript } from "@/state/calls";
 
 const LINE_PAUSE_MS = 1500;
 
@@ -16,7 +16,7 @@ type Props = {
 export default function CallScreen({ call, step, picks, battery, onStep, onHangUp }: Props) {
   const steps = call.steps ?? [];
   const current = steps[step];
-  const isSay = current?.type === 'say';
+  const isSay = current?.type === "say";
 
   useEffect(() => {
     if (!isSay) return;
@@ -26,10 +26,10 @@ export default function CallScreen({ call, step, picks, battery, onStep, onHangU
 
   let pickIndex = 0;
   const transcript = steps.slice(0, step).map((item) => {
-    if (item.type === 'say') return { who: item.who, text: item.text };
+    if (item.type === "say") return { who: item.who, text: item.text };
     const choice = item.options[picks[pickIndex] ?? -1];
     pickIndex += 1;
-    return { who: '나', text: choice?.reply ?? '' };
+    return { who: "나", text: choice?.reply ?? "" };
   });
 
   return (
@@ -41,10 +41,10 @@ export default function CallScreen({ call, step, picks, battery, onStep, onHangU
 
       <ul className="flex flex-1 flex-col justify-end gap-3 overflow-y-auto px-5 py-6">
         {transcript.map((line, index) => (
-          <li key={index} className={`flex ${line.who === '나' ? 'justify-end' : 'justify-start'}`}>
+          <li key={index} className={`flex ${line.who === "나" ? "justify-end" : "justify-start"}`}>
             <p
               className={`max-w-[80%] rounded-[18px] px-4 py-2.5 text-[15px] leading-[1.5] ${
-                line.who === '나' ? 'bg-[#0A84FF] text-white' : 'bg-white/10 text-white'
+                line.who === "나" ? "bg-[#0A84FF] text-white" : "bg-white/10 text-white"
               }`}
             >
               {line.text}
@@ -54,7 +54,7 @@ export default function CallScreen({ call, step, picks, battery, onStep, onHangU
       </ul>
 
       <div className="flex flex-col gap-2 px-5">
-        {current?.type === 'choose' ? (
+        {current?.type === "choose" ? (
           current.options.map((option, index) => (
             <button
               key={option.label}

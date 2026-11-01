@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { ChevronLeft, Megaphone } from 'lucide-react';
-import PostCard, { type PostData } from '@/components/apps/instagram/PostCard';
-import { useGameState } from '@/state/GameState';
-import { addClue } from '@/state/runState';
-import { dayIndex, RUMOR_HANDLE, visibleRumorPosts } from '@/state/social';
-import { setComment, submitTipline, toggleLike, toggleSave } from '@/state/socialActions';
-import { tipline } from '@/data/story/tipline';
+import { useState } from "react";
+import { ChevronLeft, Megaphone } from "lucide-react";
+import PostCard, { type PostData } from "@/components/apps/instagram/PostCard";
+import { useGameState } from "@/state/GameState";
+import { addClue } from "@/state/runState";
+import { dayIndex, RUMOR_HANDLE, visibleRumorPosts } from "@/state/social";
+import { setComment, submitTipline, toggleLike, toggleSave } from "@/state/socialActions";
+import { tipline } from "@/data/story/tipline";
 
 type Props = {
   onBack: () => void;
@@ -21,14 +21,19 @@ export default function RumorAccount({ onBack }: Props) {
   const rumors = visibleRumorPosts(run.t).slice().reverse();
 
   function sendTip(choiceId: string) {
-    update((current) => addClue(submitTipline(current, choiceId, Math.random()), 'C07'));
+    update((current) => addClue(submitTipline(current, choiceId, Math.random()), "C07"));
     setSheetOpen(false);
   }
 
   return (
     <div className="relative flex h-full flex-col">
       <header className="flex items-center gap-2 border-b border-[var(--line)] px-3 pb-2.5 pt-[calc(env(safe-area-inset-top)+58px)]">
-        <button type="button" onClick={onBack} aria-label="뒤로" className="p-1 text-[var(--accent)]">
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="뒤로"
+          className="p-1 text-[var(--accent)]"
+        >
           <ChevronLeft size={26} strokeWidth={2} aria-hidden="true" />
         </button>
         <p className="flex-1 truncate text-[15px] font-semibold">{RUMOR_HANDLE}</p>
@@ -51,7 +56,7 @@ export default function RumorAccount({ onBack }: Props) {
           disabled={tippedToday}
           className="h-10 w-full rounded-full bg-[var(--card)] text-[14px] font-semibold text-[var(--fg)] transition-opacity disabled:opacity-40"
         >
-          {tippedToday ? '오늘은 이미 제보했어요' : '제보하기'}
+          {tippedToday ? "오늘은 이미 제보했어요" : "제보하기"}
         </button>
       </div>
 
@@ -61,12 +66,12 @@ export default function RumorAccount({ onBack }: Props) {
             id: rumor.id,
             handle: RUMOR_HANDLE,
             avatar: null,
-            place: '',
+            place: "",
             time: `${rumor.day}일차 ${rumor.time}`,
             caption: rumor.text,
             likes: rumor.likes,
-            tone: ['#2A2A33', '#0E0E12'],
-            kind: 'notice',
+            tone: ["#2A2A33", "#0E0E12"],
+            kind: "notice",
             edited: null,
             comments: rumor.comments,
           };
@@ -88,15 +93,22 @@ export default function RumorAccount({ onBack }: Props) {
       </div>
 
       {sheetOpen && (
-        <div className="absolute inset-0 z-20 flex flex-col justify-end bg-black/60" onClick={() => setSheetOpen(false)}>
+        <div
+          className="absolute inset-0 z-20 flex flex-col justify-end bg-black/60"
+          onClick={() => setSheetOpen(false)}
+        >
           <div
             role="dialog"
             aria-label="제보 선택"
             onClick={(event) => event.stopPropagation()}
             className="flex flex-col gap-2 rounded-t-[22px] bg-[var(--card)] p-4 pb-[calc(env(safe-area-inset-bottom)+16px)]"
           >
-            <p className="pb-1 text-center text-[14px] font-semibold text-[var(--fg)]">어떻게 제보할까요?</p>
-            <p className="pb-1 text-center text-[11px] text-[var(--fg-2)]">하루에 한 번만 보낼 수 있어요 · 2분 소요</p>
+            <p className="pb-1 text-center text-[14px] font-semibold text-[var(--fg)]">
+              어떻게 제보할까요?
+            </p>
+            <p className="pb-1 text-center text-[11px] text-[var(--fg-2)]">
+              하루에 한 번만 보낼 수 있어요 · 2분 소요
+            </p>
             {tipline.choices.map((choice) => (
               <button
                 key={choice.id}
@@ -107,7 +119,11 @@ export default function RumorAccount({ onBack }: Props) {
                 {choice.label}
               </button>
             ))}
-            <button type="button" onClick={() => setSheetOpen(false)} className="h-9 text-[13px] text-[var(--fg-2)]">
+            <button
+              type="button"
+              onClick={() => setSheetOpen(false)}
+              className="h-9 text-[13px] text-[var(--fg-2)]"
+            >
               취소
             </button>
           </div>

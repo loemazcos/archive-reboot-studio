@@ -1,4 +1,4 @@
-import { buildMonthCells, KIND_META, type CalendarEvent } from '@/lib/calendar';
+import { buildMonthCells, KIND_META, type CalendarEvent } from "@/lib/calendar";
 
 type Props = {
   year: number;
@@ -8,7 +8,13 @@ type Props = {
   onSelect: (key: string) => void;
 };
 
-export default function CalendarMonthGrid({ year, monthIndex, selectedKey, eventsByDate, onSelect }: Props) {
+export default function CalendarMonthGrid({
+  year,
+  monthIndex,
+  selectedKey,
+  eventsByDate,
+  onSelect,
+}: Props) {
   const cells = buildMonthCells(year, monthIndex);
 
   return (
@@ -28,7 +34,7 @@ export default function CalendarMonthGrid({ year, monthIndex, selectedKey, event
           >
             <span
               className={`flex h-8 w-8 items-center justify-center rounded-full text-[14px] ${
-                selected ? 'bg-[var(--accent)] font-bold text-white' : 'text-[var(--fg)]'
+                selected ? "bg-[var(--accent)] font-bold text-white" : "text-[var(--fg)]"
               }`}
             >
               {cell.day}

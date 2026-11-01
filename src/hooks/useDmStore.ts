@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 import {
   fetchDmRows,
   openDmThreadOnServer,
@@ -9,9 +9,9 @@ import {
   type DmReply,
   type DmRow,
   type DmThread,
-} from '@/lib/dmChat';
+} from "@/lib/dmChat";
 
-type Status = 'loading' | 'ready' | 'error';
+type Status = "loading" | "ready" | "error";
 type SendHandlers = { onSent: () => void; onReply: (reply: DmReply) => void };
 
 const TYPING_MS = 600;
@@ -21,7 +21,7 @@ const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(re
 
 export function useDmStore(now: number) {
   const [rows, setRows] = useState<DmRow[]>([]);
-  const [status, setStatus] = useState<Status>('loading');
+  const [status, setStatus] = useState<Status>("loading");
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [typingId, setTypingId] = useState<string | null>(null);
   const [dueTimes, setDueTimes] = useState<number[]>([]);
@@ -30,9 +30,9 @@ export function useDmStore(now: number) {
   const refresh = useCallback(async () => {
     try {
       setRows(await fetchDmRows());
-      setStatus('ready');
+      setStatus("ready");
     } catch {
-      setStatus((current) => (current === 'loading' ? 'error' : current));
+      setStatus((current) => (current === "loading" ? "error" : current));
     }
   }, []);
 
@@ -58,22 +58,22 @@ export function useDmStore(now: number) {
     try {
       await openDmThreadOnServer(threadId);
     } catch {
-      setNotice({ threadId, text: '대화를 여는 중 연결이 끊겼어요. 다시 열어 주세요.' });
+      setNotice({ threadId, text: "대화를 여는 중 연결이 끊겼어요. 다시 열어 주세요." });
     }
     await refresh();
   }
 
   async function send(thread: DmThread, text: string, handlers: SendHandlers) {
-    if (status !== 'ready' || pendingId) return;
+    if (status !== "ready" || pendingId) return;
     setPendingId(thread.id);
     setNotice(null);
     // Show the player's message right away; the server copy replaces it on refresh.
     const optimistic = {
       id: -Date.now(),
       thread_id: thread.id,
-      sender: 'me',
+      sender: "me",
       body: text,
-      status: 'sent',
+      status: "sent",
       deliver_at: now,
       read_at: null,
       unsend_after_min: null,
@@ -86,7 +86,7 @@ export function useDmStore(now: number) {
     try {
       await saveMyDmMessage(thread.id, text);
     } catch {
-      setNotice({ threadId: thread.id, text: '메시지를 보내지 못했어요. 연결을 확인해 주세요.' });
+      setNotice({ threadId: thread.id, text: "메시지를 보내지 못했어요. 연결을 확인해 주세요." });
       setRows((current) => current.filter((row) => row !== optimistic));
       setPendingId(null);
       return;
@@ -95,10 +95,14 @@ export function useDmStore(now: number) {
     void refresh();
 
     try {
-      const history = [...thread.messages, ...rowsFor(thread.id).map((row) => rowToMessage(row, thread.name)), { from: 'me' as const, text }]
-        .filter((message) => message.from !== 'system')
+      const history = [
+        ...thread.messages,
+        ...rowsFor(thread.id).map((row) => rowToMessage(row, thread.name)),
+        { from: "me" as const, text },
+      ]
+        .filter((message) => message.from !== "system")
         .slice(-30)
-        .map((message) => ({ from: message.from as 'me' | 'them', text: message.text }));
+        .map((message) => ({ from: message.from as "me" | "them", text: message.text }));
       const reply = await requestDmReply(thread.id, history);
       handlers.onReply(reply);
 
@@ -110,9 +114,12 @@ export function useDmStore(now: number) {
       const later = due.filter((time) => time > now);
       if (later.length > 0) setDueTimes((current) => [...current, ...later]);
 
-      const instantCycles = Math.min(1, reply.messages
-        .filter((message) => message.delay_min === 0)
-        .reduce((max, message) => Math.max(max, message.typing_cycles), 0));
+      const instantCycles = Math.min(
+        1,
+        reply.messages
+          .filter((message) => message.delay_min === 0)
+          .reduce((max, message) => Math.max(max, message.typing_cycles), 0),
+      );
       for (let i = 0; i < instantCycles; i += 1) {
         setTypingId(thread.id);
         await wait(TYPING_MS);
@@ -123,7 +130,8 @@ export function useDmStore(now: number) {
     } catch (error) {
       setNotice({
         threadId: thread.id,
-        text: error instanceof Error ? error.message : '답장이 도착하지 않았어요. 다시 보내 주세요.',
+        text:
+          error instanceof Error ? error.message : "답장이 도착하지 않았어요. 다시 보내 주세요.",
       });
     } finally {
       setTypingId(null);

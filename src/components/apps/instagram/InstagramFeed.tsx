@@ -1,12 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
-import { Heart, Send } from 'lucide-react';
-import Avatar from '@/components/apps/Avatar';
-import PostCard, { type PostData } from '@/components/apps/instagram/PostCard';
-import { useGameState } from '@/state/GameState';
-import { addClue, openFeedPage } from '@/state/runState';
-import { isNightForSanghyuk, RUMOR_HANDLE, SANGHYUK_HANDLE, visibleRumorPosts } from '@/state/social';
-import { likePost, setComment, toggleLike, toggleSave } from '@/state/socialActions';
-import { posts as postData } from '@/data/instagram';
+import { useEffect, useRef, useState } from "react";
+import { Heart, Send } from "lucide-react";
+import Avatar from "@/components/apps/Avatar";
+import PostCard, { type PostData } from "@/components/apps/instagram/PostCard";
+import { useGameState } from "@/state/GameState";
+import { addClue, openFeedPage } from "@/state/runState";
+import {
+  isNightForSanghyuk,
+  RUMOR_HANDLE,
+  SANGHYUK_HANDLE,
+  visibleRumorPosts,
+} from "@/state/social";
+import { likePost, setComment, toggleLike, toggleSave } from "@/state/socialActions";
+import { posts as postData } from "@/data/instagram";
 
 const posts = postData as PostData[];
 const PAGE_STEP = 5;
@@ -32,7 +37,7 @@ export default function InstagramFeed({ onOpenRumor, onOpenStory }: Props) {
           setVisible((count) => Math.min(count + PAGE_STEP, posts.length));
         }
       },
-      { root: root.current, rootMargin: '200px' },
+      { root: root.current, rootMargin: "200px" },
     );
     observer.observe(target);
     return () => observer.disconnect();
@@ -40,10 +45,15 @@ export default function InstagramFeed({ onOpenRumor, onOpenStory }: Props) {
 
   const { social } = run;
   const shown = posts.slice(0, visible);
-  const shownClues = shown.map((post) => post.clue).filter((clue): clue is string => Boolean(clue)).join(',');
+  const shownClues = shown
+    .map((post) => post.clue)
+    .filter((clue): clue is string => Boolean(clue))
+    .join(",");
   useEffect(() => {
     if (!shownClues) return;
-    update((current) => shownClues.split(',').reduce((acc, clueId) => addClue(acc, clueId), current));
+    update((current) =>
+      shownClues.split(",").reduce((acc, clueId) => addClue(acc, clueId), current),
+    );
   }, [shownClues, update]);
   const rumorItems = visibleRumorPosts(run.t)
     .slice()
@@ -52,12 +62,12 @@ export default function InstagramFeed({ onOpenRumor, onOpenStory }: Props) {
       id: rumor.id,
       handle: RUMOR_HANDLE,
       avatar: null,
-      place: '',
+      place: "",
       time: `${rumor.day}일차 ${rumor.time}`,
       caption: rumor.text,
       likes: rumor.likes,
-      tone: ['#2A2A33', '#0E0E12'],
-      kind: 'notice',
+      tone: ["#2A2A33", "#0E0E12"],
+      kind: "notice",
       edited: null,
       comments: rumor.comments,
       commentCount: Math.max(rumor.comments.length, Math.round(rumor.likes / 30)),
@@ -89,33 +99,35 @@ export default function InstagramFeed({ onOpenRumor, onOpenStory }: Props) {
         >
           <span
             className={`rounded-full p-[3px] ${
-              sanghyukNight ? 'bg-[linear-gradient(45deg,#FBC17D,#E0457B)]' : 'bg-[var(--line)]'
+              sanghyukNight ? "bg-[linear-gradient(45deg,#FBC17D,#E0457B)]" : "bg-[var(--line)]"
             }`}
           >
             <span className="block rounded-full border-2 border-[var(--bg,#fff)]">
               <Avatar photo="상혁" label={SANGHYUK_HANDLE} size={58} />
             </span>
           </span>
-          <span className="max-w-full truncate text-[12px] text-[var(--fg)]">{SANGHYUK_HANDLE}</span>
+          <span className="max-w-full truncate text-[12px] text-[var(--fg)]">
+            {SANGHYUK_HANDLE}
+          </span>
         </button>
       </div>
 
       <div className="flex flex-col gap-3">
         {rumorItems.map((item, index) => (
-        <PostCard
-          key={item.id}
-          post={item}
-          liked={social.liked.includes(item.id)}
-          saved={social.saved.includes(item.id)}
-          comment={social.comments[item.id] ?? null}
-          commentCount={item.commentCount}
-          extraComments={index === 0 ? social.rumorNotes : []}
-          onLike={() => update((current) => toggleLike(current, item.id))}
-          onSave={() => update((current) => toggleSave(current, item.id))}
-          onComment={(text) => update((current) => setComment(current, item.id, text))}
-          onOpenAccount={onOpenRumor}
-        />
-      ))}
+          <PostCard
+            key={item.id}
+            post={item}
+            liked={social.liked.includes(item.id)}
+            saved={social.saved.includes(item.id)}
+            comment={social.comments[item.id] ?? null}
+            commentCount={item.commentCount}
+            extraComments={index === 0 ? social.rumorNotes : []}
+            onLike={() => update((current) => toggleLike(current, item.id))}
+            onSave={() => update((current) => toggleSave(current, item.id))}
+            onComment={(text) => update((current) => setComment(current, item.id, text))}
+            onOpenAccount={onOpenRumor}
+          />
+        ))}
       </div>
 
       {shown.map((post) => (
@@ -133,8 +145,11 @@ export default function InstagramFeed({ onOpenRumor, onOpenStory }: Props) {
         />
       ))}
 
-      <div ref={sentinel} className="flex h-12 items-center justify-center text-[12px] text-[var(--fg-2)]">
-        {hasMore ? '게시물을 불러오는 중' : '모든 게시물을 확인했습니다'}
+      <div
+        ref={sentinel}
+        className="flex h-12 items-center justify-center text-[12px] text-[var(--fg-2)]"
+      >
+        {hasMore ? "게시물을 불러오는 중" : "모든 게시물을 확인했습니다"}
       </div>
     </div>
   );

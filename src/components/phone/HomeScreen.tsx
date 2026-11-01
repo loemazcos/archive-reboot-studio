@@ -1,22 +1,23 @@
-import { useRef, useState, type MouseEvent, type PointerEvent } from 'react';
-import { apps, dockIds } from '@/data/apps.config';
-import { device } from '@/data/device';
-import AppIcon from '@/components/phone/AppIcon';
-import HomeWidgets from '@/components/phone/HomeWidgets';
-import type { AppConfig } from '@/lib/types';
-import { useGameState } from '@/state/GameState';
-import { kakaoRooms, kakaoUnread } from '@/lib/kakao';
+import { useRef, useState, type MouseEvent, type PointerEvent } from "react";
+import { apps, dockIds } from "@/data/apps.config";
+import { device } from "@/data/device";
+import AppIcon from "@/components/phone/AppIcon";
+import HomeWidgets from "@/components/phone/HomeWidgets";
+import type { AppConfig } from "@/lib/types";
+import { useGameState } from "@/state/GameState";
+import { kakaoRooms, kakaoUnread } from "@/lib/kakao";
 
 const PAGE_SIZE = 16;
-const TOP_OFFSET = 'calc(env(safe-area-inset-top) + 96px)';
-const SPRING = 'cubic-bezier(0.32, 0.72, 0, 1)';
+const TOP_OFFSET = "calc(env(safe-area-inset-top) + 96px)";
+const SPRING = "cubic-bezier(0.32, 0.72, 0, 1)";
 const SWIPE_ACTIVATE_PX = 8;
 const SWIPE_COMMIT_RATIO = 0.2;
 
 const dockApps = dockIds.flatMap((id) => apps.filter((app) => app.id === id));
 const gridApps = apps.filter((app) => !dockIds.includes(app.id));
 const gridPages: AppConfig[][] = [];
-for (let i = 0; i < gridApps.length; i += PAGE_SIZE) gridPages.push(gridApps.slice(i, i + PAGE_SIZE));
+for (let i = 0; i < gridApps.length; i += PAGE_SIZE)
+  gridPages.push(gridApps.slice(i, i + PAGE_SIZE));
 const PAGE_COUNT = gridPages.length + 1;
 const initialBadges: Record<string, number> = device.badges;
 
@@ -48,13 +49,13 @@ export default function HomeScreen({
   // Badges stack per app and clear once the app is opened.
   const badges: Record<string, number> = {};
   for (const app of apps) {
-    if (app.id === 'kakao') {
+    if (app.id === "kakao") {
       const unread = kakaoRooms.reduce((sum, room) => sum + kakaoUnread(room, run), 0);
       if (unread > 0) badges[app.id] = unread;
       continue;
     }
     const seen = run.appSeen[app.id];
-    let count = seen === undefined ? initialBadges[app.id] ?? 0 : 0;
+    let count = seen === undefined ? (initialBadges[app.id] ?? 0) : 0;
     for (const notice of run.notices) {
       if (notice.appId !== app.id || notice.queued || notice.arriveAt > run.t) continue;
       if (seen === undefined || notice.arriveAt > seen) count += 1;
@@ -97,7 +98,7 @@ export default function HomeScreen({
 
   function handleClick(event: MouseEvent<HTMLDivElement>) {
     if (!editing) return;
-    if ((event.target as HTMLElement).closest('button')) return;
+    if ((event.target as HTMLElement).closest("button")) return;
     onStopEditing();
   }
 
@@ -107,7 +108,7 @@ export default function HomeScreen({
   return (
     <div
       className="absolute inset-0 overflow-hidden"
-      style={{ touchAction: 'pan-y' }}
+      style={{ touchAction: "pan-y" }}
       onClick={handleClick}
     >
       <div
@@ -115,14 +116,18 @@ export default function HomeScreen({
         style={{
           width: `${PAGE_COUNT * 100}%`,
           transform: `translate3d(${trackOffset}, 0, 0)`,
-          transition: dragX === 0 ? `transform 450ms ${SPRING}` : 'none',
+          transition: dragX === 0 ? `transform 450ms ${SPRING}` : "none",
         }}
       >
         <section className="h-full shrink-0 px-5" style={{ ...pageWidth, paddingTop: TOP_OFFSET }}>
           <HomeWidgets now={now} />
         </section>
         {gridPages.map((group, index) => (
-          <section key={index} className="h-full shrink-0 px-6" style={{ ...pageWidth, paddingTop: TOP_OFFSET }}>
+          <section
+            key={index}
+            className="h-full shrink-0 px-6"
+            style={{ ...pageWidth, paddingTop: TOP_OFFSET }}
+          >
             <div className="grid grid-cols-4 justify-items-center gap-y-6">
               {group.map((app) => (
                 <AppIcon
@@ -167,7 +172,7 @@ export default function HomeScreen({
           {Array.from({ length: PAGE_COUNT }, (_, index) => (
             <span
               key={index}
-              className={`h-1.5 w-1.5 rounded-full ${index === page ? 'bg-[var(--fg)]' : 'bg-[var(--fg-2)]'}`}
+              className={`h-1.5 w-1.5 rounded-full ${index === page ? "bg-[var(--fg)]" : "bg-[var(--fg-2)]"}`}
             />
           ))}
           <span className="text-[12px] font-medium text-[var(--fg)]">검색</span>

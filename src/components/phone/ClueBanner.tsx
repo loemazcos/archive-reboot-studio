@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { clues } from '@/data/story/clues';
+import { useEffect, useState } from "react";
+import { clues } from "@/data/story/clues";
 
 type Props = {
   clueId: string;
@@ -30,7 +30,7 @@ export default function ClueBanner({ clueId, onDone }: Props) {
     <div
       role="status"
       className={`pointer-events-none absolute inset-x-3 top-[calc(env(safe-area-inset-top)+8px)] z-[70] rounded-[22px] bg-[var(--glass)] px-4 py-3 shadow-lg backdrop-blur-[24px] transition-all duration-500 ease-out ${
-        shown ? 'translate-y-0 opacity-100' : '-translate-y-6 opacity-0'
+        shown ? "translate-y-0 opacity-100" : "-translate-y-6 opacity-0"
       }`}
     >
       <p className="text-[11px] font-semibold text-[var(--fg-2)]">단서 획득 · {clue.app}</p>

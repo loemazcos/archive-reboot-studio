@@ -1,12 +1,12 @@
-import { kakaoRooms, type KakaoMessage } from '@/lib/kakao';
-import { dmThreads } from '@/data/instagram';
-import type { RunState } from '@/state/runState';
-import { dayIndex, parseClock } from '@/state/social';
-import { clampStat } from '@/state/stats';
-import { DAY_MIN, clockOf, type Notice } from '@/state/timeline';
-import { kakaoEvents } from '@/data/story/kakao-events';
+import { kakaoRooms, type KakaoMessage } from "@/lib/kakao";
+import { dmThreads } from "@/data/instagram";
+import type { RunState } from "@/state/runState";
+import { dayIndex, parseClock } from "@/state/social";
+import { clampStat } from "@/state/stats";
+import { DAY_MIN, clockOf, type Notice } from "@/state/timeline";
+import { kakaoEvents } from "@/data/story/kakao-events";
 
-export const UNIFORM_POLL_ID = 'ev-d1-uniform';
+export const UNIFORM_POLL_ID = "ev-d1-uniform";
 
 export type KakaoAddition = KakaoMessage & { room: string };
 
@@ -22,16 +22,16 @@ type NewKakaoMessage = {
   id: string;
   room: string;
   from: string;
-  type: KakaoMessage['type'];
+  type: KakaoMessage["type"];
   text: string;
   question?: string;
   options?: { label: string; votes: number }[];
 };
 
-export const PERSONAL_ROOM_IDS: string[] = ['donghyun', 'jaehyun', 'seongho'];
+export const PERSONAL_ROOM_IDS: string[] = ["donghyun", "jaehyun", "seongho"];
 
 export function kakaoDate(t: number): string {
-  return `2026-10-${String(13 + dayIndex(t)).padStart(2, '0')}`;
+  return `2026-10-${String(13 + dayIndex(t)).padStart(2, "0")}`;
 }
 
 export function kakaoAt(date: string, time: string): number {
@@ -40,7 +40,11 @@ export function kakaoAt(date: string, time: string): number {
 }
 
 function roomName(roomId: string): string {
-  return kakaoRooms.find((room) => room.id === roomId)?.name ?? dmThreads.find((thread) => thread.id === roomId)?.name ?? roomId;
+  return (
+    kakaoRooms.find((room) => room.id === roomId)?.name ??
+    dmThreads.find((thread) => thread.id === roomId)?.name ??
+    roomId
+  );
 }
 
 export function addKakaoMessage(run: RunState, message: NewKakaoMessage, at: number): RunState {
@@ -48,12 +52,12 @@ export function addKakaoMessage(run: RunState, message: NewKakaoMessage, at: num
   const entry: KakaoAddition = { ...message, date: kakaoDate(at), time };
   const personal = PERSONAL_ROOM_IDS.includes(message.room);
   const notice: Notice[] =
-    message.from === 'me'
+    message.from === "me"
       ? []
       : [
           {
             id: `kakao-${message.id}`,
-            appId: personal ? 'insta' : 'kakao',
+            appId: personal ? "insta" : "kakao",
             title: roomName(message.room),
             body: message.text,
             time,
@@ -67,8 +71,10 @@ export function addKakaoMessage(run: RunState, message: NewKakaoMessage, at: num
 
 function applyKakaoEffect(run: RunState, effect: KakaoEffect | undefined): RunState {
   if (!effect) return run;
-  const peakHit = effect.mindIfRumorPeak !== undefined && run.rumorPeak >= effect.mindIfRumorPeak.atLeast;
-  const mindDelta = peakHit && effect.mindIfRumorPeak ? effect.mindIfRumorPeak.mind : (effect.mind ?? 0);
+  const peakHit =
+    effect.mindIfRumorPeak !== undefined && run.rumorPeak >= effect.mindIfRumorPeak.atLeast;
+  const mindDelta =
+    peakHit && effect.mindIfRumorPeak ? effect.mindIfRumorPeak.mind : (effect.mind ?? 0);
   const clues =
     effect.clue && !run.clues.includes(effect.clue) ? [...run.clues, effect.clue] : run.clues;
   return {
@@ -92,13 +98,13 @@ export function settleKakaoEvents(run: RunState): RunState {
         id: event.id,
         room: event.room,
         from: event.from,
-        type: event.type as KakaoMessage['type'],
+        type: event.type as KakaoMessage["type"],
         text: event.text,
-        question: 'question' in event ? event.question : undefined,
-        options: 'options' in event ? event.options?.map((option) => ({ ...option })) : undefined,
+        question: "question" in event ? event.question : undefined,
+        options: "options" in event ? event.options?.map((option) => ({ ...option })) : undefined,
       },
       at,
     );
-    return applyKakaoEffect(added, 'effect' in event ? (event.effect as KakaoEffect) : undefined);
+    return applyKakaoEffect(added, "effect" in event ? (event.effect as KakaoEffect) : undefined);
   }, run);
 }

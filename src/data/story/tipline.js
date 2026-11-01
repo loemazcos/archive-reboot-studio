@@ -10,20 +10,20 @@ export const tipline = {
   cost: { minutes: 2, battery: 1 },
   choices: [
     {
-      id: 'correct',
-      label: '정정 요청 보내기',
+      id: "correct",
+      label: "정정 요청 보내기",
       delta: -4,
-      backfire: { chance: 0.2, delta: 3, note: '정정 요청이 들어왔습니다. 확인 중입니다.' },
+      backfire: { chance: 0.2, delta: 3, note: "정정 요청이 들어왔습니다. 확인 중입니다." },
     },
     {
-      id: 'reveal',
-      label: '재밌는 걸 제보한다',
+      id: "reveal",
+      label: "재밌는 걸 제보한다",
       delta: 6,
-      followUp: { title: '동현', text: '야 제보 너냐ㅋㅋ' },
+      followUp: { title: "동현", text: "야 제보 너냐ㅋㅋ" },
     },
     {
-      id: 'watch',
-      label: '그냥 구경만',
+      id: "watch",
+      label: "그냥 구경만",
       delta: 0,
     },
   ],

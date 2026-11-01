@@ -1,12 +1,12 @@
-import type { RunState } from '@/state/runState';
+import type { RunState } from "@/state/runState";
 
-const PHOTO_KEY = 'photos.unlocked';
+const PHOTO_KEY = "photos.unlocked";
 
 /** Photo ids shown in Photos beyond the default album. Empty for new saves. */
 export function unlockedPhotoIds(run: RunState): string[] {
   try {
-    const parsed: unknown = JSON.parse(run.appFlags[PHOTO_KEY] ?? '[]');
-    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
+    const parsed: unknown = JSON.parse(run.appFlags[PHOTO_KEY] ?? "[]");
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
   } catch {
     return [];
   }

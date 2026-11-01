@@ -1,4 +1,4 @@
-import { formatClock } from '@/lib/gameTime';
+import { formatClock } from "@/lib/gameTime";
 
 export const DAY_MIN = 24 * 60;
 export const START_T = 21 * 60 + 47;
@@ -20,8 +20,12 @@ export const CHARGED_BATTERY = 100;
 export const NO_CHARGE_PENALTY = 10;
 export const RESTART_BATTERY = 5;
 
-export type Phase = 'school' | 'recess' | 'free';
-export type Crossing = { at: number; kind: 'recessStart' | 'dismissal' | 'nightCut'; recessIndex: number };
+export type Phase = "school" | "recess" | "free";
+export type Crossing = {
+  at: number;
+  kind: "recessStart" | "dismissal" | "nightCut";
+  recessIndex: number;
+};
 export type Notice = {
   id: string;
   appId: string;
@@ -34,10 +38,14 @@ export type Notice = {
 };
 export type ClockRun = { t: number; nextWakeT: number; skipLastRecess: boolean };
 
-const CROSSING_OFFSETS: { offset: number; kind: Crossing['kind']; recessIndex: number }[] = [
-  ...RECESS_STARTS.map((offset, recessIndex) => ({ offset, kind: 'recessStart' as const, recessIndex })),
-  { offset: SCHOOL_END, kind: 'dismissal', recessIndex: -1 },
-  { offset: NIGHT_CUT_AT, kind: 'nightCut', recessIndex: -1 },
+const CROSSING_OFFSETS: { offset: number; kind: Crossing["kind"]; recessIndex: number }[] = [
+  ...RECESS_STARTS.map((offset, recessIndex) => ({
+    offset,
+    kind: "recessStart" as const,
+    recessIndex,
+  })),
+  { offset: SCHOOL_END, kind: "dismissal", recessIndex: -1 },
+  { offset: NIGHT_CUT_AT, kind: "nightCut", recessIndex: -1 },
 ];
 
 export function dateOf(t: number): Date {
@@ -62,22 +70,25 @@ export function isRecessSkipped(run: ClockRun, index: number): boolean {
 
 export function phaseOf(run: ClockRun): Phase {
   const rel = minutesIntoDay(run);
-  if (rel < SCHOOL_START || rel >= SCHOOL_END) return 'free';
+  if (rel < SCHOOL_START || rel >= SCHOOL_END) return "free";
   const inRecess = RECESS_STARTS.some(
     (start, index) => rel >= start && rel < start + RECESS_MINUTES && !isRecessSkipped(run, index),
   );
-  return inRecess ? 'recess' : 'school';
+  return inRecess ? "recess" : "school";
 }
 
 export function minutesUntilNextBreak(run: ClockRun): number {
   const rel = minutesIntoDay(run);
-  const next = RECESS_STARTS.find((start, index) => start > rel && !isRecessSkipped(run, index)) ?? SCHOOL_END;
+  const next =
+    RECESS_STARTS.find((start, index) => start > rel && !isRecessSkipped(run, index)) ?? SCHOOL_END;
   return next - rel;
 }
 
 export function crossingsBetween(run: ClockRun, from: number, to: number): Crossing[] {
   const start = dayStartOf(run);
-  return CROSSING_OFFSETS.map((c) => ({ at: start + c.offset, kind: c.kind, recessIndex: c.recessIndex })).filter(
-    (c) => c.at > from && c.at <= to,
-  );
+  return CROSSING_OFFSETS.map((c) => ({
+    at: start + c.offset,
+    kind: c.kind,
+    recessIndex: c.recessIndex,
+  })).filter((c) => c.at > from && c.at <= to);
 }

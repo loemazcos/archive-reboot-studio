@@ -1,6 +1,6 @@
-import { useRef, type PointerEvent } from 'react';
-import AppGlyph from '@/components/phone/AppGlyph';
-import type { AppConfig } from '@/lib/types';
+import { useRef, type PointerEvent } from "react";
+import AppGlyph from "@/components/phone/AppGlyph";
+import type { AppConfig } from "@/lib/types";
 
 const LONG_PRESS_MS = 450;
 const MOVE_TOLERANCE_PX = 10;
@@ -14,7 +14,14 @@ type Props = {
   onLongPress: () => void;
 };
 
-export default function AppIcon({ app, badge, wiggle, showLabel = true, onOpen, onLongPress }: Props) {
+export default function AppIcon({
+  app,
+  badge,
+  wiggle,
+  showLabel = true,
+  onOpen,
+  onLongPress,
+}: Props) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const timer = useRef<number | undefined>(undefined);
   const start = useRef<{ x: number; y: number } | null>(null);
@@ -67,7 +74,7 @@ export default function AppIcon({ app, badge, wiggle, showLabel = true, onOpen, 
       onClick={handleClick}
       onContextMenu={(event) => event.preventDefault()}
     >
-      <span className={`relative ${wiggle ? 'phone-wiggle' : ''}`}>
+      <span className={`relative ${wiggle ? "phone-wiggle" : ""}`}>
         <AppGlyph app={app} />
         {badge ? (
           <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#FF3B30] px-1.5 text-[12px] font-semibold text-white">
@@ -76,7 +83,9 @@ export default function AppIcon({ app, badge, wiggle, showLabel = true, onOpen, 
         ) : null}
       </span>
       {showLabel ? (
-        <span className="w-full truncate text-center text-[12px] leading-[1.2] text-[var(--fg)]">{app.name}</span>
+        <span className="w-full truncate text-center text-[12px] leading-[1.2] text-[var(--fg)]">
+          {app.name}
+        </span>
       ) : null}
     </button>
   );

@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { Power } from 'lucide-react';
+import { useEffect } from "react";
+import { Power } from "lucide-react";
 
 const BOOT_MS = 2500;
 
