@@ -194,7 +194,7 @@ export default function Phone() {
   const incoming = incomingCall(run);
   const activeCall = run.activeCall ? findCall(run.activeCall.id) : null;
 
-  const dark = isNightTime(now);
+  const dark = run.appFlags['settings.theme'] === 'dark' || (run.appFlags['settings.theme'] !== 'light' && isNightTime(now));
   const recentApps = recentIds.flatMap((id) => apps.filter((app) => app.id === id));
 
   function toScreenRect(target: DOMRect): Rect {
