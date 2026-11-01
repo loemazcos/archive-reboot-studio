@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, Send } from 'lucide-react';
 import Avatar from '@/components/apps/Avatar';
 import { useReportScreen } from '@/components/phone/ScreenReport';
-import { type DmThread } from '@/lib/dmChat';
+import { type DmMessage, type DmThread } from '@/lib/dmChat';
 import { useGameState } from '@/state/GameState';
 import { answerSanghyuk, eraseDraft, sendDm } from '@/state/runState';
 import { openDoublesPrompt } from '@/state/doubles';
@@ -18,9 +18,9 @@ const FIRST_TYPING_MS = 2500;
 const GAP_MS = 1000;
 const SECOND_TYPING_MS = 2000;
 
-type Props = { thread: DmThread; onBack: () => void };
+type Props = { thread: DmThread; live: DmMessage[]; typing: boolean; notice: string | null; onSend: (text: string) => void; onBack: () => void };
 
-export default function SanghyukChat({ thread, onBack }: Props) {
+export default function SanghyukChat({ thread, live, typing, notice, onSend, onBack }: Props) {
   const { run, update } = useGameState();
   useReportScreen({ screen: '인스타 DM', title: thread.name, lines: thread.messages.slice(-3).map((message) => message.text) });
   const { choice, answeredAt } = run.sanghyuk;
@@ -29,6 +29,11 @@ export default function SanghyukChat({ thread, onBack }: Props) {
   const [draft, setDraft] = useState('');
   const [rhythmId, setRhythmId] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
+  const listRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = listRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [live.length, typing, phase]);
   const doublesPrompt = openDoublesPrompt(run.doubles, run.t);
 
   useEffect(() => {
@@ -63,7 +68,9 @@ export default function SanghyukChat({ thread, onBack }: Props) {
   }
 
   function submit() {
-    if (!draft.trim()) return;
+    const text = draft.trim();
+    if (!text) return;
+    onSend(text);
     setDraft('');
   }
 
@@ -86,7 +93,7 @@ export default function SanghyukChat({ thread, onBack }: Props) {
         </div>
       </header>
 
-      <div className="pan-y-scroll flex flex-1 flex-col gap-1.5 overflow-y-auto px-3 py-3">
+      <div ref={listRef} className="pan-y-scroll flex flex-1 flex-col gap-1.5 overflow-y-auto px-3 py-3">
         {thread.messages.map((message, index) => {
           if (message.from === 'system') {
             return (
@@ -155,7 +162,20 @@ export default function SanghyukChat({ thread, onBack }: Props) {
             </div>
           ))}
 
-        {phase === 'typing' && (
+        {live.map((message, index) => (
+          <div key={`live-${index}`} className={`flex ${message.from === 'me' ? 'justify-end' : 'justify-start'}`}>
+            <p
+              className={`max-w-[75%] rounded-[18px] px-3.5 py-2 text-[15px] leading-[1.4] ${
+                message.from === 'me' ? 'rounded-br-[6px] bg-[#0A84FF] text-white' : 'rounded-bl-[6px] bg-[var(--card)] text-[var(--fg)]'
+              }`}
+            >
+              {message.text}
+            </p>
+          </div>
+        ))}
+        {notice && <p className="my-2 text-center text-[12px] text-[var(--fg-2)]">{notice}</p>}
+
+        {(phase === 'typing' || typing) && (
           <div className="flex justify-start">
             <span className="flex items-center gap-1 rounded-[18px] rounded-bl-[6px] bg-[var(--card)] px-3.5 py-3" aria-label="입력 중">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--fg-2)]" />
