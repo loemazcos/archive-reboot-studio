@@ -16,6 +16,8 @@ export type PostData = {
   kind: 'photo' | 'notice' | 'deleted';
   edited: string | null;
   comments: { handle: string; text: string }[];
+  clue?: string;
+  likeClue?: string;
 };
 
 type Props = {

@@ -83,6 +83,7 @@ export const posts = [
     time: '4일 전',
     caption: '운동 끝. 자판기 앞에서 한 장.',
     likes: 1024,
+    likeClue: 'C03',
     tone: ['#2B3A34', '#0F1C17'],
     kind: 'photo',
     edited: null,
@@ -182,6 +183,7 @@ export const posts = [
   {
     id: 'p14',
     handle: 'xclovts',
+    clue: 'C04',
     avatar: null,
     place: '',
     time: '2026.05.29 · 23:58',

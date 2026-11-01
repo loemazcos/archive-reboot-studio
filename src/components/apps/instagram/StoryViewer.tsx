@@ -3,6 +3,7 @@ import { ChevronLeft, Heart, MessageCircle } from 'lucide-react';
 import Avatar from '@/components/apps/Avatar';
 import { useGameState } from '@/state/GameState';
 import { dayIndex, MAIN_HANDLE, SANGHYUK_HANDLE, SUB_ACCOUNT_DAY, SUB_HANDLE } from '@/state/social';
+import { addClue } from '@/state/runState';
 import { heartStory } from '@/state/socialActions';
 import { sanghyukStory } from '@/data/instagram';
 
@@ -21,6 +22,7 @@ export default function StoryViewer({ onClose, onReply }: Props) {
 
   function viewAs(next: Account) {
     setAccount(next);
+    update((current) => addClue(current, 'C02'));
   }
 
   function heart() {

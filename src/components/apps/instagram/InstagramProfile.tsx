@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import Avatar from '@/components/apps/Avatar';
 import type { PostData } from '@/components/apps/instagram/PostCard';
 import { useGameState } from '@/state/GameState';
+import { addClue } from '@/state/runState';
 import { dayIndex, MAIN_HANDLE, SUB_ACCOUNT_DAY, SUB_HANDLE } from '@/state/social';
 import { setAccount } from '@/state/socialActions';
 import { posts as postData } from '@/data/instagram';
@@ -10,6 +12,7 @@ const posts = postData as PostData[];
 
 export default function InstagramProfile() {
   const { run, update } = useGameState();
+  const [friendsOpen, setFriendsOpen] = useState(false);
   const { account, liked } = run.social;
   const subAllowed = dayIndex(run.t) >= SUB_ACCOUNT_DAY;
   const handle = account === 'sub' ? SUB_HANDLE : MAIN_HANDLE;
@@ -59,6 +62,21 @@ export default function InstagramProfile() {
             {subAllowed ? '부계정' : '부계정 (4일차부터)'}
           </button>
         </div>
+      </div>
+
+      <div className="px-4 pb-4">
+        <button
+          type="button"
+          onClick={() => {
+            setFriendsOpen(true);
+            update((current) => addClue(current, 'C05'));
+          }}
+          className="flex w-full items-center justify-between rounded-[14px] bg-[var(--card)] px-4 py-3 text-left text-[14px] font-semibold"
+        >
+          상혁 계정 · 친한 친구 목록
+          <span className="text-[12px] font-normal text-[var(--fg-2)]">{friendsOpen ? '0명' : '보기'}</span>
+        </button>
+        {friendsOpen && <p className="px-1 pt-2 text-[13px] text-[var(--fg-2)]">목록은 비어 있어요. 편집 기록은 남아 있어요.</p>}
       </div>
 
       {ownPosts.length > 0 ? (

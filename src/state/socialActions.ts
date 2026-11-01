@@ -1,4 +1,4 @@
-import { advanceRun, type RunState } from '@/state/runState';
+import { addClue, advanceRun, type RunState } from '@/state/runState';
 import { dayIndex, SUB_ACCOUNT_DAY } from '@/state/social';
 import { DAY_MIN, RECESS_STARTS, clockOf, dayStartOf, type Notice } from '@/state/timeline';
 import { costs } from '@/data/story/costs';
@@ -12,6 +12,12 @@ function toggle(list: string[], id: string): string[] {
 
 export function toggleLike(run: RunState, postId: string): RunState {
   return { ...run, social: { ...run.social, liked: toggle(run.social.liked, postId) } };
+}
+
+export function likePost(run: RunState, post: { id: string; likeClue?: string }): RunState {
+  const next = toggleLike(run, post.id);
+  if (!post.likeClue || run.social.liked.includes(post.id)) return next;
+  return addClue(next, post.likeClue);
 }
 
 export function toggleSave(run: RunState, postId: string): RunState {

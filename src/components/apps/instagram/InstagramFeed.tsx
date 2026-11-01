@@ -3,9 +3,9 @@ import { Heart, Send } from 'lucide-react';
 import Avatar from '@/components/apps/Avatar';
 import PostCard, { type PostData } from '@/components/apps/instagram/PostCard';
 import { useGameState } from '@/state/GameState';
-import { openFeedPage } from '@/state/runState';
+import { addClue, openFeedPage } from '@/state/runState';
 import { isNightForSanghyuk, RUMOR_HANDLE, SANGHYUK_HANDLE, visibleRumorPosts } from '@/state/social';
-import { setComment, toggleLike, toggleSave } from '@/state/socialActions';
+import { likePost, setComment, toggleLike, toggleSave } from '@/state/socialActions';
 import { posts as postData } from '@/data/instagram';
 
 const posts = postData as PostData[];
@@ -39,6 +39,12 @@ export default function InstagramFeed({ onOpenRumor, onOpenStory }: Props) {
   }, [update]);
 
   const { social } = run;
+  const shown = posts.slice(0, visible);
+  const shownClues = shown.map((post) => post.clue).filter((clue): clue is string => Boolean(clue)).join(',');
+  useEffect(() => {
+    if (!shownClues) return;
+    update((current) => shownClues.split(',').reduce((acc, clueId) => addClue(acc, clueId), current));
+  }, [shownClues, update]);
   const rumorItems = visibleRumorPosts(run.t)
     .slice()
     .reverse()
@@ -56,7 +62,6 @@ export default function InstagramFeed({ onOpenRumor, onOpenStory }: Props) {
       comments: rumor.comments,
       commentCount: Math.max(rumor.comments.length, Math.round(rumor.likes / 30)),
     }));
-  const shown = posts.slice(0, visible);
   const hasMore = visible < posts.length;
   const sanghyukNight = isNightForSanghyuk(run.t);
 
@@ -121,7 +126,7 @@ export default function InstagramFeed({ onOpenRumor, onOpenStory }: Props) {
           saved={social.saved.includes(post.id)}
           comment={social.comments[post.id] ?? null}
           commentCount={post.comments.length}
-          onLike={() => update((current) => toggleLike(current, post.id))}
+          onLike={() => update((current) => likePost(current, post))}
           onSave={() => update((current) => toggleSave(current, post.id))}
           onComment={(text) => update((current) => setComment(current, post.id, text))}
           onOpenAccount={post.handle === RUMOR_HANDLE ? onOpenRumor : undefined}
