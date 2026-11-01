@@ -12,8 +12,9 @@ import {
 import { callbacks } from "./callbacks";
 
 const DEVICE_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const MINUTE_LIMIT = 6;
-const DAY_LIMIT = 80;
+const MINUTE_LIMIT = 12;
+const DAY_LIMIT = 300;
+const RECENT_OTHER_LIMIT = 8;
 const DAY_MINUTES = 1440;
 const CALLBACK_KEYS = Object.keys(callbacks) as (keyof typeof callbacks)[];
 
@@ -195,6 +196,23 @@ async function loadRun(supabase: Db, deviceId: string): Promise<RunState | null>
   const run = data?.run;
   if (!run || typeof run.t !== "number") return null;
   return run as RunState;
+}
+
+async function recentOtherThreadsBlock(supabase: Db, deviceId: string, threadId: string, run: RunState) {
+  const { data, error } = await supabase
+    .from("dm_messages")
+    .select("thread_id, sender, body, deliver_at")
+    .eq("device_id", deviceId)
+    .neq("thread_id", threadId)
+    .lte("deliver_at", run.t)
+    .order("deliver_at", { ascending: false })
+    .limit(RECENT_OTHER_LIMIT);
+  if (error) throw new Error("recent failed");
+  const lines = ((data ?? []) as { thread_id: string; sender: string; body: string; deliver_at: number }[])
+    .reverse()
+    .map((row) => `${row.thread_id === "sanghyuk" ? "상혁" : row.thread_id === "donghyun" ? "동현" : row.thread_id === "jaehyun" ? "재현" : "성호"}에게 ${row.sender === "me" ? "태산" : "상대"}: ${row.body}`);
+  if (lines.length === 0) return "";
+  return `\n<recent>\n태산이 다른 사람과 최근에 나눈 대화(참고만 하고 그 내용을 그대로 옮기지 않는다):\n${lines.join("\n")}\n</recent>`;
 }
 
 async function consumeRateLimit(supabase: Db, key: string, windowStart: string, limit: number) {
@@ -440,7 +458,8 @@ export async function handle(body: any): Promise<Result> {
       return json({ ...reply, fallback: false });
     }
 
-    const system = `${PERSONAS[threadId]}\n\n${COMMON_RULES}\n\n${stateBlock(run, threadId)}\n\n반드시 reply 도구를 한 번 호출해 답한다.`;
+    const recent = await recentOtherThreadsBlock(supabase, deviceId, threadId, run);
+    const system = `${PERSONAS[threadId]}\n\n${COMMON_RULES}\n\n${stateBlock(run, threadId)}${recent}\n\n반드시 reply 도구를 한 번 호출해 답한다.`;
     const toolInput = await requestClaudeReply(turns, system).catch(() => null);
     const parsed = toolInput ? parseReply(toolInput, threadId, run) : null;
 
