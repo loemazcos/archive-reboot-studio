@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import KakaoRoomList from '@/components/apps/kakao/KakaoRoomList';
 import KakaoRoomChat from '@/components/apps/kakao/KakaoRoomChat';
-import { kakaoRooms, type KakaoMessage, type KakaoRoom } from '@/lib/kakao';
+import { kakaoRooms, kakaoUnread, type KakaoMessage, type KakaoRoom } from '@/lib/kakao';
 import { useGameState } from '@/state/GameState';
 import { chooseConsult, voteUniform } from '@/state/kakaoActions';
 import { UNIFORM_POLL_ID } from '@/state/kakaoEvents';
@@ -10,7 +10,6 @@ import { leaveThread, viewThread } from '@/state/runState';
 export default function KakaoApp() {
   const { run, update } = useGameState();
   const [openId, setOpenId] = useState<string | null>(null);
-  const [readIds, setReadIds] = useState<string[]>([]);
   const [sent, setSent] = useState<Record<string, KakaoMessage[]>>({});
   useEffect(() => () => update(leaveThread), [update]);
 
@@ -18,14 +17,14 @@ export default function KakaoApp() {
     () =>
       kakaoRooms.map((room) => ({
         ...room,
-        unread: readIds.includes(room.id) ? 0 : room.unread,
+        unread: kakaoUnread(room, run),
         messages: [
           ...room.messages,
           ...run.kakaoAdded.filter((message) => message.room === room.id),
           ...(sent[room.id] ?? []),
         ],
       })),
-    [readIds, sent, run.kakaoAdded],
+    [sent, run],
   );
 
   const votes: Record<string, number> = run.uniform === null ? {} : { [UNIFORM_POLL_ID]: run.uniform - 1 };
@@ -63,7 +62,6 @@ export default function KakaoApp() {
       rooms={rooms}
       onOpen={(id) => {
         update((current) => viewThread(current, id));
-        setReadIds((current) => (current.includes(id) ? current : [...current, id]));
         setOpenId(id);
       }}
     />

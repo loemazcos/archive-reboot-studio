@@ -30,6 +30,24 @@ export type KakaoRoom = {
 
 export const kakaoRooms = roomData as KakaoRoom[];
 
+type UnreadRun = {
+  viewing: string | null;
+  seenNotices: string[];
+  notices: { id: string; appId: string; threadId?: string | null; arriveAt: number; queued?: boolean }[];
+  t: number;
+};
+
+export function kakaoUnread(room: KakaoRoom, run: UnreadRun) {
+  if (run.viewing === room.id) return 0;
+  const initial = run.seenNotices.includes(`open:${room.id}`) ? 0 : room.unread;
+  return (
+    initial +
+    run.notices.filter(
+      (n) => n.appId === 'kakao' && n.threadId === room.id && !n.queued && n.arriveAt <= run.t && !run.seenNotices.includes(n.id),
+    ).length
+  );
+}
+
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 export function formatDayLabel(date: string) {

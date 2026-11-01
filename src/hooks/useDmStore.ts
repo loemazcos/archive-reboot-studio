@@ -14,8 +14,8 @@ import {
 type Status = 'loading' | 'ready' | 'error';
 type SendHandlers = { onSent: () => void; onReply: (reply: DmReply) => void };
 
-const TYPING_MS = 1500;
-const TYPING_GAP_MS = 1200;
+const TYPING_MS = 600;
+const TYPING_GAP_MS = 250;
 
 const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
 
@@ -110,9 +110,9 @@ export function useDmStore(now: number) {
       const later = due.filter((time) => time > now);
       if (later.length > 0) setDueTimes((current) => [...current, ...later]);
 
-      const instantCycles = reply.messages
+      const instantCycles = Math.min(1, reply.messages
         .filter((message) => message.delay_min === 0)
-        .reduce((max, message) => Math.max(max, message.typing_cycles), 0);
+        .reduce((max, message) => Math.max(max, message.typing_cycles), 0));
       for (let i = 0; i < instantCycles; i += 1) {
         setTypingId(thread.id);
         await wait(TYPING_MS);

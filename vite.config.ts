@@ -12,4 +12,6 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Pre-bundle recharts so the dev server never re-optimizes it mid-session (stale module imports).
+  vite: { optimizeDeps: { include: ["recharts"] } },
 });

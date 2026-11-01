@@ -107,7 +107,7 @@ export default function Phone() {
   const [seenDay, setSeenDay] = useState(run.day);
   const [cutDay, setCutDay] = useState<number | null>(null);
   const [banner, setBanner] = useState<Notice | null>(null);
-  const arrivedNotices = run.notices.filter((notice) => notice.arriveAt <= run.t && !notice.queued);
+  const arrivedNotices = run.notices.filter((notice) => notice.arriveAt <= run.t && !notice.queued && (!run.viewing || notice.threadId !== run.viewing));
   const latestNotice = arrivedNotices[arrivedNotices.length - 1] ?? null;
   const seenNotice = useRef(latestNotice?.id ?? null);
   const audible = run.soundOn && !run.dnd;
@@ -122,6 +122,9 @@ export default function Phone() {
     playSound('message', audible);
   }, [latestNotice, audible]);
   const clearBanner = useCallback(() => setBanner(null), []);
+  useEffect(() => {
+    if (banner?.threadId && banner.threadId === run.viewing) setBanner(null);
+  }, [banner, run.viewing]);
 
   const [snapshot, setSnapshot] = useState<ScreenSnapshot | null>(null);
   const [flashing, setFlashing] = useState(false);
@@ -191,7 +194,7 @@ export default function Phone() {
   const incoming = incomingCall(run);
   const activeCall = run.activeCall ? findCall(run.activeCall.id) : null;
 
-  const dark = isNightTime(now);
+  const dark = run.appFlags['settings.theme'] === 'dark' || (run.appFlags['settings.theme'] !== 'light' && isNightTime(now));
   const recentApps = recentIds.flatMap((id) => apps.filter((app) => app.id === id));
 
   function toScreenRect(target: DOMRect): Rect {

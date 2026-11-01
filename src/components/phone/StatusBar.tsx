@@ -10,7 +10,7 @@ export default function StatusBar({ now }: Props) {
   const low = run.lowPower || run.battery <= LOW_POWER_LINE;
   const BatteryIcon = low ? BatteryLow : BatteryFull;
   return (
-    <header className="pointer-events-none absolute inset-x-0 top-0 z-[60] flex h-[60px] items-start justify-between pl-8 pr-4 pt-[calc(env(safe-area-inset-top)+14px)] text-[var(--fg)]">
+    <header className="pointer-events-none absolute inset-x-0 top-0 z-[60] flex h-[60px] items-start justify-between px-8 pt-[calc(env(safe-area-inset-top)+14px)] text-[var(--fg)]">
       <span className="flex items-center gap-1 text-[16px] font-semibold tabular-nums">
         {formatClock(now)}
         {run.dnd ? <Moon size={12} strokeWidth={2.4} aria-label="방해금지 켜짐" /> : null}

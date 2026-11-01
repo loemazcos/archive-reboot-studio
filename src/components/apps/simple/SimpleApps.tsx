@@ -1,4 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Lock, MapPin, Phone as PhoneIcon, PhoneIncoming, PhoneMissed, PhoneOutgoing, Play, Search } from 'lucide-react';
 import AppShell, { Group, Row, Tabs } from '@/components/apps/simple/AppShell';
 import SpotifyApp from '@/components/apps/spotify/SpotifyApp';
@@ -338,9 +339,65 @@ export function PhotosApp() {
 }
 
 /* ---------------- 시계 (알람 이름 바꾸기) ---------------- */
+function formatLap(ms: number) {
+  const v = Math.floor(ms / 10);
+  return `${String(Math.floor(v / 6000)).padStart(2, '0')}:${String(Math.floor(v / 100) % 60).padStart(2, '0')}.${String(v % 100).padStart(2, '0')}`;
+}
+
+function Stopwatch() {
+  const [running, setRunning] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [laps, setLaps] = useState<number[]>([]);
+  const startedAt = useRef(0);
+  const acc = useRef(0);
+  useEffect(() => {
+    if (!running) return;
+    const timer = window.setInterval(() => setElapsed(acc.current + performance.now() - startedAt.current), 32);
+    return () => window.clearInterval(timer);
+  }, [running]);
+  function toggle() {
+    if (running) {
+      acc.current += performance.now() - startedAt.current;
+      setElapsed(acc.current);
+    } else startedAt.current = performance.now();
+    setRunning(!running);
+  }
+  function lapOrReset() {
+    if (running) setLaps((l) => [...l, acc.current + performance.now() - startedAt.current]);
+    else {
+      acc.current = 0;
+      setElapsed(0);
+      setLaps([]);
+    }
+  }
+  return (
+    <AppShell title="스톱워치">
+      <p className="my-14 text-center text-[48px] font-light tabular-nums">{formatLap(elapsed)}</p>
+      <div className="flex justify-around">
+        <button type="button" onClick={lapOrReset} disabled={!running && elapsed === 0} className="h-20 w-20 rounded-full bg-[var(--card)] disabled:opacity-40">
+          {running ? '랩' : '재설정'}
+        </button>
+        <button type="button" onClick={toggle} className="h-20 w-20 rounded-full bg-[var(--card)] font-semibold text-[var(--accent)]">
+          {running ? '중단' : '시작'}
+        </button>
+      </div>
+      {laps.length > 0 && (
+        <Group label="랩 기록">
+          {laps.map((total, i) => <Row key={i} title={`랩 ${i + 1}`} right={formatLap(total - (laps[i - 1] ?? 0))} />).reverse()}
+        </Group>
+      )}
+    </AppShell>
+  );
+}
+
+const WEEK_STEPS = [
+  { day: '월', steps: 5820 }, { day: '화', steps: 7340 }, { day: '수', steps: 6120 }, { day: '목', steps: 8900 },
+  { day: '금', steps: 4230 }, { day: '토', steps: 7147 }, { day: '일', steps: 6412 },
+];
+
 export function ClockApp() {
   const { run, update, visible, reveal } = useStory();
-  const [tab, setTab] = useState<'alarm' | 'world' | 'timer'>('alarm');
+  const [tab, setTab] = useState<'alarm' | 'world' | 'stopwatch'>('alarm');
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const labelOf = (id: string, fallback: string) => run.appFlags[`alarm:${id}`] ?? fallback;
@@ -390,12 +447,10 @@ export function ClockApp() {
             </Group>
           </AppShell>
         ) : (
-          <AppShell title="타이머">
-            <p className="mt-16 text-center text-[64px] font-light tabular-nums">00:00</p>
-          </AppShell>
+          <Stopwatch />
         )}
       </div>
-      <Tabs tabs={[{ id: 'world', label: '세계 시계' }, { id: 'alarm', label: '알람' }, { id: 'timer', label: '타이머' }]} value={tab} onChange={setTab} />
+      <Tabs tabs={[{ id: 'world', label: '세계 시계' }, { id: 'alarm', label: '알람' }, { id: 'stopwatch', label: '스톱워치' }]} value={tab} onChange={setTab} />
     </div>
   );
 }
@@ -412,9 +467,9 @@ export function BrowserApp() {
         <Search size={16} aria-hidden="true" className="text-[var(--fg-2)]" />
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색 또는 웹사이트 이름" className="flex-1 bg-transparent text-[15px] outline-none" />
       </label>
-      {query ? <p className="mt-3 px-2 text-[13px] text-[var(--fg-2)]">교내 와이파이에서는 검색이 제한돼요.</p> : null}
+      <p className="mt-3 px-2 text-[13px] text-[var(--fg-2)]">{query.trim() ? '저장된 검색 기록에서 찾은 결과예요.' : '저장된 페이지를 검색하고 열어 보세요.'}</p>
       <Group label="최근 검색">
-        {visible(searches).slice().reverse().map((item) => (
+        {visible(searches).filter((item) => item.text.toLowerCase().includes(query.trim().toLowerCase())).slice().reverse().map((item) => (
           <Row key={item.id} title={item.text} right={item.repeat ? `${item.repeat}회` : undefined} onClick={() => { reveal(item); setOpen(item); }} />
         ))}
       </Group>
@@ -429,6 +484,20 @@ export function HealthApp() {
   if (open) return <Detail title={open.label} onBack={() => setOpen(null)}><b>{open.value}</b>{'\n'}{open.note ?? ''}</Detail>;
   return (
     <AppShell title="요약">
+      <section className="mt-3 rounded-[18px] bg-[var(--card)] p-4">
+        <p className="text-[14px] text-[var(--fg-2)]">오늘 걸음</p>
+        <p className="mt-1 text-[36px] font-semibold tabular-nums">6,412 <span className="text-[15px] font-normal">걸음</span></p>
+        <p className="mt-1 text-[12px] text-[var(--fg-2)]">이번 주 일평균 6,567걸음</p>
+        <div className="mt-4 h-44">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={WEEK_STEPS}>
+              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'var(--fg-2)', fontSize: 12 }} />
+              <Tooltip formatter={(v) => [`${Number(v).toLocaleString('ko-KR')}걸음`, '걸음 수']} contentStyle={{ background: 'var(--card)', color: 'var(--fg)', borderRadius: 12 }} cursor={false} />
+              <Bar dataKey="steps" fill="var(--accent)" radius={[6, 6, 0, 0]} isAnimationActive={false} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
       <Group label="활동">
         {visible(health).map((item) => (
           <Row key={item.id} title={item.label} right={item.value} onClick={() => { reveal(item); setOpen(item); }} />
@@ -453,7 +522,7 @@ export function MapApp() {
   }
 
   return (
-    <div className="relative flex h-full flex-col bg-[#e8efe3] text-[var(--fg)]">
+    <div className="relative flex h-full flex-col bg-[var(--bg)] text-[var(--fg)]">
       <div className="absolute inset-0 opacity-70" style={{ backgroundImage: 'linear-gradient(90deg, rgba(255,255,255,.8) 2px, transparent 2px), linear-gradient(rgba(255,255,255,.8) 2px, transparent 2px)', backgroundSize: '64px 64px' }} />
       <div className="relative px-3 pt-[calc(env(safe-area-inset-top)+58px)]">
         <label className="flex h-12 items-center gap-2 rounded-[14px] bg-[var(--card)] px-3 shadow-sm">
@@ -468,9 +537,14 @@ export function MapApp() {
           <p className="mt-2 rounded-[14px] bg-[var(--card)] px-4 py-3 text-[13px] text-[var(--fg-2)]">검색 결과가 없어요</p>
         ) : null}
       </div>
-      <div className="relative flex-1">
+      <div className="relative min-h-[280px] flex-1 overflow-hidden">
+        <div className="absolute left-[12%] top-[12%] h-[38%] w-[66%] rounded-[24px] border-4 border-[var(--card)] bg-[var(--accent)]/10" />
+        <div className="absolute left-0 top-[58%] h-8 w-full -rotate-12 bg-[var(--card)]" />
+        <div className="absolute left-[62%] top-0 h-full w-6 rotate-12 bg-[var(--card)]" />
+        <span className="absolute left-[30%] top-[28%] text-[12px] font-semibold text-[var(--fg-2)]">보넥고등학교</span>
+        <span className="absolute bottom-3 left-3 rounded-lg bg-[var(--card)] px-2 py-1 text-[11px] text-[var(--fg-2)]">보넥동 · 학교 주변 약도</span>
         {pinned.map((place, i) => (
-          <button key={place.id} type="button" onClick={() => setSelected(place)} className="absolute flex flex-col items-center" style={{ left: `${20 + ((i * 37) % 60)}%`, top: `${15 + ((i * 23) % 55)}%` }}>
+          <button key={place.id} type="button" onClick={() => choose(place)} className="absolute flex flex-col items-center" style={{ left: `${20 + ((i * 37) % 60)}%`, top: `${15 + ((i * 23) % 55)}%` }}>
             <MapPin size={30} className="text-[#e5484d]" aria-hidden="true" />
             <span className="rounded-full bg-[var(--card)] px-2 py-0.5 text-[11px] font-semibold">{place.name}</span>
           </button>

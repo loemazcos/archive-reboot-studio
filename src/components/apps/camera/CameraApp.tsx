@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { RefreshCcw, Zap, ZapOff } from 'lucide-react';
 import { CaptureAlbum } from '@/components/apps/camera/CaptureAlbum';
 import { useGameState } from '@/state/GameState';
+import { captureScreen } from '@/state/runState';
+import { playSound } from '@/lib/sound';
 import { unlockPhoto, unlockedPhotoIds } from '@/components/apps/photos/photoState';
 
 const MODES = ['타임랩스', '슬로모', '비디오', '사진', '인물', '파노라마'];
@@ -20,7 +22,11 @@ export default function CameraApp() {
 
   function shoot() {
     if (flash) return;
-    update((current) => unlockPhoto(current, `camera:${Date.now()}`));
+    const id = `camera:${Date.now()}`;
+    update((current) =>
+      unlockPhoto(captureScreen(current, { id, screen: '카메라', title: front ? '전면 카메라 사진' : '창가 사진', lines: [front ? '전면 카메라로 찍은 사진' : '창문 너머 풍경과 책상', `확대 ${zoom}배`], evidence: false }), id),
+    );
+    playSound('shutter', run.soundOn && !run.dnd);
     setFlash(true);
     timer.current = setTimeout(() => setFlash(false), 160);
   }

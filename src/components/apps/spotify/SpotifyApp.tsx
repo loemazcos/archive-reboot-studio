@@ -60,7 +60,7 @@ export default function SpotifyApp({ children }: { children?: ReactNode }) {
       <div className="min-h-0 flex-1 overflow-y-auto pb-28">
         <div className="bg-gradient-to-b from-[#7a2d2d] to-[#121212] px-5 pb-5 pt-[calc(env(safe-area-inset-top)+60px)]">
           <div className="mx-auto grid h-[200px] w-[200px] grid-cols-2 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.6)]">
-            {[who, why, nineteen, stars].map((src, i) => <img key={i} src={src} alt="" className="h-full w-full object-cover" width={100} height={100} />)}
+            {[...new Set(PLAYLIST.map((track) => track.art))].map((src, i) => <img key={i} src={src} alt="" className="h-full w-full object-cover" width={100} height={100} />)}
           </div>
           <h1 className="mt-5 text-[24px] font-bold">보넥도 사랑 노래 모음</h1>
           <p className="mt-1 text-[13px] text-white/70">태산 · 곡 5개 · 약 15분</p>

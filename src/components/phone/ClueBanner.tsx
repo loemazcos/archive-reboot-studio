@@ -22,7 +22,7 @@ export default function ClueBanner({ clueId, onDone }: Props) {
       window.clearTimeout(leave);
       window.clearTimeout(done);
     };
-  }, [onDone]);
+  }, [clueId, onDone]);
 
   if (!clue) return null;
 

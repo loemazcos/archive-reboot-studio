@@ -5,6 +5,7 @@ import AppIcon from '@/components/phone/AppIcon';
 import HomeWidgets from '@/components/phone/HomeWidgets';
 import type { AppConfig } from '@/lib/types';
 import { useGameState } from '@/state/GameState';
+import { kakaoRooms, kakaoUnread } from '@/lib/kakao';
 
 const PAGE_SIZE = 16;
 const TOP_OFFSET = 'calc(env(safe-area-inset-top) + 96px)';
@@ -47,6 +48,11 @@ export default function HomeScreen({
   // Badges stack per app and clear once the app is opened.
   const badges: Record<string, number> = {};
   for (const app of apps) {
+    if (app.id === 'kakao') {
+      const unread = kakaoRooms.reduce((sum, room) => sum + kakaoUnread(room, run), 0);
+      if (unread > 0) badges[app.id] = unread;
+      continue;
+    }
     const seen = run.appSeen[app.id];
     let count = seen === undefined ? initialBadges[app.id] ?? 0 : 0;
     for (const notice of run.notices) {

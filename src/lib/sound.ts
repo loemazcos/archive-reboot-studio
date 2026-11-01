@@ -1,8 +1,12 @@
-export type SoundKind = 'message' | 'banner' | 'typing' | 'heartbeat' | 'battery' | 'clue';
+export type SoundKind = 'message' | 'banner' | 'typing' | 'heartbeat' | 'battery' | 'clue' | 'shutter';
 
 type Tone = { freq: number; start: number; duration: number; gain: number; type?: OscillatorType; sweepTo?: number };
 
 const TONES: Record<SoundKind, Tone[]> = {
+  shutter: [
+    { freq: 1800, sweepTo: 180, start: 0, duration: 0.045, gain: 0.12, type: 'square' },
+    { freq: 900, sweepTo: 120, start: 0.065, duration: 0.055, gain: 0.09, type: 'square' },
+  ],
   message: [
     { freq: 988, start: 0, duration: 0.09, gain: 0.12 },
     { freq: 1319, start: 0.1, duration: 0.12, gain: 0.12 },
