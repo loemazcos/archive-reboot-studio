@@ -1,16 +1,17 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { ChevronDown, Heart, Pause, Play, Shuffle, SkipBack, SkipForward } from 'lucide-react';
-import who from '@/assets/spotify/who.jpg';
+import whoArt from '@/assets/spotify/who.jpg.asset.json';
+import howArt from '@/assets/spotify/how.jpg.asset.json';
+import nineteenArt from '@/assets/spotify/1999.jpg.asset.json';
 import why from '@/assets/spotify/why.jpg';
-import nineteen from '@/assets/spotify/1999.jpg';
-import stars from '@/assets/spotify/stars.jpg';
 
+// Album art lives only here — swap a URL to change a cover.
 export const PLAYLIST = [
-  { id: 't1', title: '돌아버리겠다', album: 'WHO!', art: who, len: 182 },
-  { id: 't2', title: 'One and Only', album: 'WHO!', art: who, len: 196 },
-  { id: 't3', title: '뭣 같다', album: 'WHY..', art: why, len: 174 },
-  { id: 't4', title: 'Nice Guy', album: '19.99', art: nineteen, len: 188 },
-  { id: 't5', title: "So let's go see the stars", album: 'So let\u2019s go see the stars', art: stars, len: 205 },
+  { id: 't1', title: 'One and Only', album: 'WHO!', art: whoArt.url, len: 196 },
+  { id: 't2', title: 'Nice Guy', album: '19.99', art: nineteenArt.url, len: 188 },
+  { id: 't3', title: 'Our', album: 'WHY..', art: why, len: 181 },
+  { id: 't4', title: 'Earth, Wind & Fire', album: 'HOW?', art: howArt.url, len: 192 },
+  { id: 't5', title: 'Serenade', album: 'WHO!', art: whoArt.url, len: 199 },
 ];
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
