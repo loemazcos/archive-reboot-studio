@@ -1,0 +1,12 @@
+[
+  {"capability":"code","source":"Vite React SPA (phone simulator game)","outcome":"migrate","status":"verified","next_action":"port into TanStack index route, client-only"},
+  {"capability":"schema","source":"supabase/migrations (game_state, dm_messages, calendar_events, clue_discoveries, rate_limits, consume_rate_limit)","outcome":"migrate","status":"verified","next_action":"consolidated Cloud migration"},
+  {"capability":"records","source":"device-scoped player saves","outcome":"migrate","status":"pending","next_action":"optional CSV export from Bolt Data; players otherwise start fresh"},
+  {"capability":"auth identities","source":"none (no sign-in, random device id)","outcome":"not_applicable","status":"verified","next_action":"none"},
+  {"capability":"authorization","source":"RLS locks tables to server; server filters by device_id","outcome":"migrate","status":"verified","next_action":"server functions with admin client"},
+  {"capability":"edge functions game-api, dm-reply","source":"supabase/functions","outcome":"migrate to server functions","status":"verified","next_action":"port"},
+  {"capability":"AI provider (Google Gemini)","source":"GEMINI_API_KEY, GEMINI_MODEL","outcome":"preserve","status":"pending","next_action":"user adds GEMINI_API_KEY secret; fallback lines used until then"},
+  {"capability":"rate limit cap","source":"GLOBAL_DAILY_CAP","outcome":"preserve (default 3000)","status":"verified","next_action":"none"},
+  {"capability":"storage, payments, email, webhooks, schedules","source":"none detected","outcome":"not_applicable","status":"verified","next_action":"none"},
+  {"capability":"verification","source":"","outcome":"game loads, saves to Cloud","status":"verified","next_action":"live AI replies need GEMINI_API_KEY"}
+]

@@ -142,3 +142,261 @@
     color: var(--color-foreground);
   }
 }
+
+/* ---- Game styles (ported) ---- */
+
+html,
+body,
+.game-root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #0b0c10;
+  font-family: -apple-system, "SF Pro Text", "Apple SD Gothic Neo", Pretendard, system-ui, sans-serif;
+  word-break: keep-all;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.phone-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+  background: radial-gradient(circle at 30% 20%, #262b36 0%, #0b0c10 70%);
+}
+
+.phone-frame {
+  position: relative;
+  flex-shrink: 0;
+  width: 100vw;
+  height: 100dvh;
+}
+
+.phone-screen {
+  --spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --fg: #000000;
+  --fg-2: rgba(60, 60, 67, 0.6);
+  --bg: #f2f2f7;
+  --card: #ffffff;
+  --glass: rgba(255, 255, 255, 0.72);
+  --key: #ffffff;
+  --key-pressed: #d1d1d6;
+  --kb: #d1d3d9;
+  --accent: #2f80ed;
+  --line: rgba(0, 0, 0, 0.1);
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000000;
+  color: var(--fg);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.phone-screen[data-theme='dark'] {
+  --fg: #ffffff;
+  --fg-2: rgba(235, 235, 245, 0.6);
+  --bg: #000000;
+  --card: #1c1c1e;
+  --glass: rgba(30, 30, 32, 0.72);
+  --key: #2c2c2e;
+  --key-pressed: #48484a;
+  --kb: #1c1c1e;
+  --line: rgba(255, 255, 255, 0.12);
+}
+
+@media (min-width: 500px) {
+  .phone-frame {
+    width: 418px;
+    height: 872px;
+    padding: 14px;
+    box-sizing: border-box;
+    border-radius: 66px;
+    background: #1c1c1e;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45), inset 0 0 0 2px #3a3a3c;
+    transform: scale(var(--phone-scale, 1));
+  }
+
+  .phone-screen {
+    width: 390px;
+    height: 844px;
+    border-radius: 52px;
+  }
+}
+
+@keyframes phone-wiggle {
+  0%,
+  100% {
+    transform: rotate(-1.6deg);
+  }
+  50% {
+    transform: rotate(1.6deg);
+  }
+}
+
+@keyframes phone-shake {
+  10%,
+  90% {
+    transform: translateX(-2px);
+  }
+  20%,
+  80% {
+    transform: translateX(4px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-8px);
+  }
+  40%,
+  60% {
+    transform: translateX(8px);
+  }
+}
+
+@keyframes phone-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.phone-wiggle {
+  animation: phone-wiggle 0.32s ease-in-out infinite;
+}
+
+.phone-shake {
+  animation: phone-shake 0.5s ease-in-out;
+}
+
+.phone-fade-in {
+  animation: phone-fade-in 0.35s var(--spring);
+}
+
+@keyframes phone-edge-pulse {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 0 rgba(255, 59, 48, 0);
+  }
+  50% {
+    box-shadow: inset 0 0 0 6px rgba(255, 59, 48, 0.85);
+  }
+}
+
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  animation: typing-dot 0.9s ease-in-out infinite;
+}
+
+@keyframes heart-pop {
+  0% {
+    transform: scale(0.6);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.heart-pop {
+  animation: heart-pop 0.35s ease-out;
+}
+
+:where(.phone-screen *) {
+  transition-property: background-color, border-color, color;
+  transition-duration: 400ms;
+  transition-timing-function: ease;
+}
+
+.phone-edge-pulse {
+  animation: phone-edge-pulse 0.9s ease-in-out infinite;
+}
+
+
+.pan-y-scroll {
+  touch-action: pan-y;
+  scrollbar-width: none;
+}
+
+.pan-y-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.phone-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--key-pressed);
+}
+
+.phone-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone-wiggle,
+  .phone-shake,
+  .phone-fade-in {
+    animation: none;
+  }
+}
+
+.game-loading { height: 100dvh; width: 100vw; background: #0b0c10; }
+
+/* Start screen: name = save slot */
+.name-screen { display:flex; min-height:100dvh; align-items:center; justify-content:center; padding:24px; background: radial-gradient(circle at 30% 20%, #262b36 0%, #0b0c10 70%); color:#f5f5f7; font-family: "Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif; }
+.name-card { display:flex; width:100%; max-width:340px; flex-direction:column; gap:12px; border-radius:28px; background:rgba(255,255,255,0.07); padding:28px 22px; backdrop-filter:blur(24px); border:1px solid rgba(255,255,255,0.1); }
+.name-eyebrow { font-size:13px; letter-spacing:.08em; color:rgba(245,245,247,.55); }
+.name-title { font-size:24px; font-weight:700; }
+.name-help { font-size:13px; line-height:1.5; color:rgba(245,245,247,.6); margin-bottom:6px; }
+.name-input { height:48px; border-radius:14px; background:rgba(255,255,255,.1); padding:0 16px; font-size:16px; color:inherit; outline:none; border:1px solid transparent; }
+.name-input:focus { border-color:rgba(255,255,255,.35); }
+.name-error { font-size:13px; color:#ff8a80; }
+.name-button { height:50px; border-radius:14px; background:#f5f5f7; color:#0b0c10; font-size:16px; font-weight:700; margin-top:6px; }
+.name-button:disabled { opacity:.5; }
