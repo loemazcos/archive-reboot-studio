@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, Megaphone, Send } from 'lucide-react';
 import KakaoMessageItem from '@/components/apps/kakao/KakaoMessageItem';
 import { useReportScreen } from '@/components/phone/ScreenReport';
@@ -14,6 +14,11 @@ type Props = {
 
 export default function KakaoRoomChat({ room, votes, onBack, onSend, onVote }: Props) {
   const [draft, setDraft] = useState('');
+  const messageList = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = messageList.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [room.id, room.messages.length]);
   useReportScreen({
     screen: '카톡',
     title: room.name,
@@ -47,7 +52,7 @@ export default function KakaoRoomChat({ room, votes, onBack, onSend, onVote }: P
         </div>
       )}
 
-      <div className="pan-y-scroll flex flex-1 flex-col overflow-y-auto px-3 py-3">
+      <div ref={messageList} className="pan-y-scroll flex flex-1 flex-col overflow-y-auto px-3 py-3">
         {room.messages.map((message, index) => {
           const previous = room.messages[index - 1];
           const showDate = !previous || previous.date !== message.date;

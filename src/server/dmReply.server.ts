@@ -445,10 +445,11 @@ export async function handle(body: any): Promise<Result> {
     const parsed = toolInput ? parseReply(toolInput, threadId, run) : null;
 
     // If the AI fails twice, a short in-character line keeps the chat going (never scripted flow).
-    const finalReply: Reply = parsed ?? (backupReply(threadId) as Reply);
+    if (!parsed) return json({ error: "답장을 불러오지 못했어요. 잠시 후 다시 보내 주세요." }, 503);
+    const finalReply: Reply = parsed;
     // Friends answer right away mid-chat; only Sanghyuk keeps his deliberate delays.
     if (threadId !== "sanghyuk") finalReply.messages = finalReply.messages.map((m, i) => ({ ...m, delay_min: i === 0 ? 0 : Math.min(m.delay_min, 1) }));
-    const reply: Reply & { fallback: boolean } = { ...finalReply, fallback: !parsed };
+    const reply: Reply & { fallback: boolean } = { ...finalReply, fallback: false };
 
     await insertThemMessages(supabase, deviceId, threadId, run.t, reply.messages);
     if (reply.read_now) await markMyMessagesRead(supabase, deviceId, threadId, run.t);
