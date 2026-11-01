@@ -27,14 +27,14 @@
 - C02 needs `core` flag set to match guide
 - Framework: vite-react
 - **Build verified passing** (dependency issues resolved)
-- **Clue triggers connected**: C01~C06, C09~C24 now discoverable in-game (22 of 24)
-- C07 and C08 still have no in-game discovery trigger
-- User assignment scope was C02–C05; C07/C08 outside that scope and intentionally left
+- **All 24 clues now connected and discoverable in-game** (C01–C24)
+- **C07 trigger**: discovered when player sends a tip from the Daejeon account; reply = clue (approximates story's "reply to tipster")
+- **C08 trigger**: discovered when student council post appears in feed; added comment about gym back-door inspection dates (10/15, 10/17, 10/23)
+- **Preview environment issue**: build passes, Vite installed locally; preview not loading — likely environment-side, not code-side (dev server can't be started by assistant)
 
 ## Open questions & assumptions
 
-- **Missing triggers (C07, C08)**: C07 (대전 계정의 제보 답장) and C08 (학생회 계정 댓글) still have no in-game discovery path
-  - Proposed: C07 → 대전 계정 화면, C08 → 인스타 게시물 댓글 — awaiting user confirmation
+- **Preview not loading**: user reports preview won't even load; build passes and dev tool installed, so failure is likely preview environment, not code — awaiting user feedback after refresh/restart
 - **clues.js vs story guide**: descriptions still mismatched; needs reconciliation
-- Need to confirm whether all 24 clues are player-discoverable before final build
 - Assumption: `REVEALABLE_CLUES` structure maps clue IDs to character dialogue unlock conditions
+- C07 trigger is an approximation of the story's "reply to tipster" — may need refinement

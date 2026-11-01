@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronLeft, Megaphone } from 'lucide-react';
 import PostCard, { type PostData } from '@/components/apps/instagram/PostCard';
 import { useGameState } from '@/state/GameState';
+import { addClue } from '@/state/runState';
 import { dayIndex, RUMOR_HANDLE, visibleRumorPosts } from '@/state/social';
 import { setComment, submitTipline, toggleLike, toggleSave } from '@/state/socialActions';
 import { tipline } from '@/data/story/tipline';
@@ -20,7 +21,7 @@ export default function RumorAccount({ onBack }: Props) {
   const rumors = visibleRumorPosts(run.t).slice().reverse();
 
   function sendTip(choiceId: string) {
-    update((current) => submitTipline(current, choiceId, Math.random()));
+    update((current) => addClue(submitTipline(current, choiceId, Math.random()), 'C07'));
     setSheetOpen(false);
   }
 

@@ -17,7 +17,11 @@ export const posts = [
     tone: ['#FFE7A3', '#F59E0B'],
     kind: 'notice',
     edited: null,
-    comments: [{ handle: 'bandbeat_', text: '무대 시간 바뀌나요?' }],
+    clue: 'C08',
+    comments: [
+      { handle: 'bandbeat_', text: '무대 시간 바뀌나요?' },
+      { handle: 'bonego_council', text: '체육관 뒷문 점검 일정: 10/15, 10/17, 10/23 정기 점검 예정입니다.' },
+    ],
   },
   {
     id: 'p02',
