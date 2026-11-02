@@ -462,6 +462,18 @@ async function deliverCallback(supabase: Db, deviceId: string, key: string, run:
 
 export async function handle(body: any): Promise<Result> {
   try {
+    if (body?.action === "runtimeStatus") {
+      return json({
+        geminiConfigured: Boolean(process.env["GEMINI_API_KEY"]),
+        gatewayConfigured: Boolean(process.env["LOVABLE_API_KEY"]),
+        supabaseConfigured: Boolean(
+          process.env["SUPABASE_URL"] &&
+          process.env["SUPABASE_PUBLISHABLE_KEY"] &&
+          process.env["SUPABASE_SERVICE_ROLE_KEY"],
+        ),
+      });
+    }
+
     const deviceId = typeof body?.deviceId === "string" ? body.deviceId : "";
     const threadId = typeof body?.threadId === "string" ? body.threadId : "";
     const history: unknown = body?.history;
