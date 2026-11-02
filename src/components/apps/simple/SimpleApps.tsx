@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import AppShell, { Group, Row, Tabs } from "@/components/apps/simple/AppShell";
 import SpotifyApp from "@/components/apps/spotify/SpotifyApp";
+import CaptureCard from "@/components/apps/camera/CaptureCard";
 import { unlockedPhotoIds } from "@/components/apps/photos/photoState";
 import { PhoneOff, MicOff, Volume2, Delete } from "lucide-react";
 import {
@@ -34,8 +35,10 @@ import {
   songs,
   timetable,
 } from "@/data/story/apps-content";
+import { clues } from "@/data/story/clues";
 import { useGameState } from "@/state/GameState";
 import { addClue, setAppFlag } from "@/state/runState";
+import { clockOf } from "@/state/timeline";
 
 type Clued = { day: number; clue?: string };
 
@@ -549,7 +552,21 @@ export function PhotosApp() {
   const { run, update, reveal } = useStory();
   const [view, setView] = useState<"list" | "hidden">("list");
   const [code, setCode] = useState("");
+  const [selectedCaptureId, setSelectedCaptureId] = useState<string | null>(null);
   const unlocked = run.appFlags.hiddenAlbum === "open";
+  const photoIds = unlockedPhotoIds(run);
+  const captures = run.captures.filter((capture) => photoIds.includes(capture.id));
+  const cluePhotos = clues.filter((clue) => photoIds.includes(`clue:${clue.id}`));
+  const selectedCapture = captures.find((capture) => capture.id === selectedCaptureId);
+  if (selectedCapture) {
+    return (
+      <AppShell title="사진" onBack={() => setSelectedCaptureId(null)}>
+        <div className="mx-auto mt-4 max-w-sm">
+          <CaptureCard capture={selectedCapture} size="full" />
+        </div>
+      </AppShell>
+    );
+  }
   if (view === "hidden") {
     return (
       <AppShell title="비공개 앨범" onBack={() => setView("list")}>
@@ -601,7 +618,9 @@ export function PhotosApp() {
           <div key={album.id} className="rounded-[14px] bg-[var(--card)] p-3">
             <div className="aspect-square rounded-[10px] bg-[var(--bg)]" />
             <p className="mt-2 text-[14px] font-semibold">{album.name}</p>
-            <p className="text-[12px] text-[var(--fg-2)]">{album.count}</p>
+            <p className="text-[12px] text-[var(--fg-2)]">
+              {album.id === "recent" ? album.count + captures.length + cluePhotos.length : album.count}
+            </p>
           </div>
         ))}
         <button
@@ -616,6 +635,24 @@ export function PhotosApp() {
           <p className="text-[12px] text-[var(--fg-2)]">잠김</p>
         </button>
       </div>
+      {captures.length || cluePhotos.length ? (
+        <Group label="최근 항목">
+          {captures
+            .slice()
+            .reverse()
+            .map((capture) => (
+              <Row
+                key={capture.id}
+                title={capture.title}
+                sub={`${capture.screen} · ${clockOf(capture.t)}`}
+                onClick={() => setSelectedCaptureId(capture.id)}
+              />
+            ))}
+          {cluePhotos.map((clue) => (
+            <Row key={clue.id} title={clue.title} sub={`${clue.app} · 단서 ${clue.id}`} />
+          ))}
+        </Group>
+      ) : null}
     </AppShell>
   );
 }

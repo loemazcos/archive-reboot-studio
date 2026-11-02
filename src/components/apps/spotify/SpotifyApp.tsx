@@ -7,11 +7,18 @@ import why from "@/assets/spotify/why.jpg";
 
 // Album art lives only here — swap a URL to change a cover.
 export const PLAYLIST = [
-  { id: "t1", title: "One and Only", album: "WHO!", art: whoArt.url, len: 196 },
-  { id: "t2", title: "Nice Guy", album: "19.99", art: nineteenArt.url, len: 188 },
-  { id: "t3", title: "Our", album: "WHY..", art: why, len: 181 },
-  { id: "t4", title: "Earth, Wind & Fire", album: "HOW?", art: howArt.url, len: 192 },
-  { id: "t5", title: "Serenade", album: "WHO!", art: whoArt.url, len: 199 },
+  { id: "t1", srcId: "1.2.8", title: "돌아버리겠다", album: "WHO!", art: whoArt.url, len: 196 },
+  { id: "t2", srcId: "1.2.8", title: "One and Only", album: "WHO!", art: whoArt.url, len: 196 },
+  { id: "t3", srcId: "1.2.5", title: "뭣 같다", album: "WHY..", art: why, len: 181 },
+  { id: "t4", srcId: "1.3.9", title: "Nice Guy", album: "19.99", art: nineteenArt.url, len: 188 },
+  {
+    id: "t5",
+    srcId: "1.2.7",
+    title: "So let's go see the stars",
+    album: "HOW?",
+    art: howArt.url,
+    len: 192,
+  },
 ];
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;

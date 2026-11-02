@@ -194,11 +194,9 @@ revealOk: ${JSON.stringify(revealOk)}
 </state>`;
 }
 
-function backupReply(threadId: string) {
-  // Never inject random canned lines — they break conversation context.
-  void BACKUP_LINES;
-  void threadId;
-  const text = "앗 잠깐 폰 렉 걸렸어 ㅋㅋ 방금 뭐라 했어?";
+function backupReply(threadId: string, history: Turn[]): Reply {
+  const lines = BACKUP_LINES[threadId] ?? ["잠깐, 마지막 말이 잘렸어. 다시 한 번만 보내 줘."];
+  const text = lines[Math.floor(history.length / 2) % lines.length]!;
   return {
     messages: [{ text, delay_min: 0, unsend_after_min: null, typing_cycles: 0 }],
     effects: ZERO_EFFECTS,
@@ -303,14 +301,13 @@ const GEMINI_SCHEMA = {
   required: ["messages", "effects", "reveal", "read_now", "mood"],
 };
 
-// Character replies: user's own Gemini key when set, otherwise the built-in AI gateway (Gemini).
+// Prefer the configured provider, then try the gateway before using an in-character fallback.
 async function requestClaudeReply(history: Turn[], system: string): Promise<unknown | null> {
-  for (let attempt = 0; attempt < 2; attempt++) {
-    const out = await (
-      process.env["GEMINI_API_KEY"]
-        ? requestGemini(history, system)
-        : requestGateway(history, system)
-    ).catch((e) => {
+  const providers = process.env["GEMINI_API_KEY"]
+    ? [requestGemini, requestGateway]
+    : [requestGateway, requestGemini];
+  for (const provider of providers) {
+    const out = await provider(history, system).catch((e) => {
       console.error("ai error", e);
       return null;
     });
@@ -504,7 +501,9 @@ export async function handle(body: any): Promise<Result> {
     if (!run) return json({ error: "게임 상태를 찾을 수 없어요." }, 409);
 
     if (!(await isWithinLimits(supabase, deviceId))) {
-      return json({ error: "요청이 너무 많아요. 잠시 후 다시 보내 주세요." }, 429);
+      const reply = backupReply(threadId, turns);
+      await insertThemMessages(supabase, deviceId, threadId, run.t, reply.messages);
+      return json({ ...reply, fallback: true });
     }
 
     if (BLOCKED_TOPIC_PATTERN.test(lastTurn.text)) {
@@ -525,15 +524,14 @@ export async function handle(body: any): Promise<Result> {
     const parsed = toolInput ? parseReply(toolInput, threadId, run) : null;
 
     // If the AI fails twice, a short in-character line keeps the chat going (never scripted flow).
-    if (!parsed) return json({ error: "답장을 불러오지 못했어요. 잠시 후 다시 보내 주세요." }, 503);
-    const finalReply: Reply = parsed;
+    const finalReply: Reply = parsed ?? backupReply(threadId, turns);
     // Friends answer right away mid-chat; only Sanghyuk keeps his deliberate delays.
     if (threadId !== "sanghyuk")
       finalReply.messages = finalReply.messages.map((m, i) => ({
         ...m,
         delay_min: i === 0 ? 0 : Math.min(m.delay_min, 1),
       }));
-    const reply: Reply & { fallback: boolean } = { ...finalReply, fallback: false };
+    const reply: Reply & { fallback: boolean } = { ...finalReply, fallback: !parsed };
 
     await insertThemMessages(supabase, deviceId, threadId, run.t, reply.messages);
     if (reply.read_now) await markMyMessagesRead(supabase, deviceId, threadId, run.t);

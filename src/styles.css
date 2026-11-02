@@ -245,6 +245,14 @@ button {
   }
 }
 
+@media (max-width: 499px) {
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    transform: scale(var(--phone-scale, 1));
+  }
+}
+
 @keyframes phone-wiggle {
   0%,
   100% {

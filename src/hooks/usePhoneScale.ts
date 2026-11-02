@@ -8,13 +8,14 @@ const WINDOW_MARGIN = 32;
 const PHONE_VIEWPORT_MAX = 500;
 
 function computeScale() {
-  if (window.innerWidth <= PHONE_VIEWPORT_MAX) {
-    return Math.min(window.innerWidth / SCREEN_WIDTH, window.innerHeight / SCREEN_HEIGHT);
-  }
+  const width = window.visualViewport?.width ?? window.innerWidth;
+  const height = window.visualViewport?.height ?? window.innerHeight;
+  if (width <= PHONE_VIEWPORT_MAX)
+    return Math.min(1, width / SCREEN_WIDTH, height / SCREEN_HEIGHT);
   return Math.min(
     1,
-    (window.innerWidth - WINDOW_MARGIN) / FRAME_WIDTH,
-    (window.innerHeight - WINDOW_MARGIN) / FRAME_HEIGHT,
+    (width - WINDOW_MARGIN) / FRAME_WIDTH,
+    (height - WINDOW_MARGIN) / FRAME_HEIGHT,
   );
 }
 
@@ -24,7 +25,13 @@ export function usePhoneScale() {
   useEffect(() => {
     const handleResize = () => setScale(computeScale());
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+    window.visualViewport?.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+      window.visualViewport?.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   return scale;

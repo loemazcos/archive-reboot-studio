@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
+import { Clock3 } from "lucide-react";
 import { apps } from "@/data/apps.config";
 import { cuts } from "@/data/story/cuts";
 import { questions, defaultQuestion } from "@/data/story/questions";
@@ -51,6 +52,7 @@ import {
 import {
   LOW_BATTERY_LINE,
   LOW_POWER_LINE,
+  SCHOOL_END,
   SLEEP_FROM,
   clockOf,
   minutesIntoDay,
@@ -175,6 +177,8 @@ export default function Phone() {
   const phase = phaseOf(run);
   const inClass = phase === "school" && !run.booted;
   const canSleep = minutesIntoDay(run) >= SLEEP_FROM && !run.booted;
+  const afterSchool = minutesIntoDay(run) >= SCHOOL_END && minutesIntoDay(run) < SLEEP_FROM;
+  const skipMinutes = Math.min(60, SLEEP_FROM - minutesIntoDay(run));
   const remitMinutes = remainingMinutes(run.t);
   const remitPulsing = run.remitStatus === "open" && remitMinutes < 30;
   const dimmed = run.lowPower || (!run.charging && run.battery <= LOW_POWER_LINE);
@@ -388,10 +392,16 @@ export default function Phone() {
             </button>
           ) : null}
 
-          {!locked && lowBattery ? (
-            <p className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+104px)] z-[54] text-center text-[12px] font-semibold text-[#FF3B30]">
-              배터리 {run.battery}%
-            </p>
+          {!locked && afterSchool && !openState && !sleepOpen ? (
+            <button
+              type="button"
+              aria-label={`${skipMinutes}분 보내기`}
+              onClick={() => update((current) => advanceRun(current, skipMinutes, 0.2))}
+              className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+66px)] z-[54] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[var(--glass)] px-3.5 py-2 text-[13px] font-semibold text-[var(--fg)] shadow-sm backdrop-blur-[20px] active:scale-95"
+            >
+              <Clock3 size={15} aria-hidden="true" />
+              {skipMinutes === 60 ? "1시간 보내기" : `${skipMinutes}분 보내기`}
+            </button>
           ) : null}
 
           {remitPulsing ? (
