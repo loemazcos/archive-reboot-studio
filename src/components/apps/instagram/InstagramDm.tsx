@@ -127,7 +127,18 @@ export default function InstagramDm({ initialThreadId }: Props) {
   }, []);
 
   if (active?.id === "sanghyuk") {
-    const live = store.rowsFor("sanghyuk").map((row) => rowToMessage(row, active.name));
+    const scripted = run.kakaoAdded
+      .filter((message) => message.room === "sanghyuk")
+      .map((message) => ({
+        from: message.from === "me" ? ("me" as const) : ("them" as const),
+        text: message.text ?? "",
+        time: message.time,
+        at: kakaoAt(message.date, message.time),
+      }));
+    const live = [
+      ...store.rowsFor("sanghyuk").map((row) => rowToMessage(row, active.name)),
+      ...scripted,
+    ].sort((a, b) => (a.at ?? 0) - (b.at ?? 0));
     return (
       <SanghyukChat
         thread={active}

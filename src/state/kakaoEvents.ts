@@ -5,6 +5,7 @@ import { dayIndex, parseClock } from "@/state/social";
 import { clampStat } from "@/state/stats";
 import { DAY_MIN, clockOf, type Notice } from "@/state/timeline";
 import { kakaoEvents } from "@/data/story/kakao-events";
+import { endingEvents } from "@/data/story/ending-events";
 
 export const UNIFORM_POLL_ID = "ev-d1-uniform";
 
@@ -28,7 +29,7 @@ type NewKakaoMessage = {
   options?: { label: string; votes: number }[];
 };
 
-export const PERSONAL_ROOM_IDS: string[] = ["donghyun", "jaehyun", "seongho"];
+export const PERSONAL_ROOM_IDS: string[] = ["sanghyuk", "donghyun", "jaehyun", "seongho"];
 
 export function kakaoDate(t: number): string {
   return `2026-10-${String(13 + dayIndex(t)).padStart(2, "0")}`;
@@ -88,7 +89,7 @@ function applyKakaoEffect(run: RunState, effect: KakaoEffect | undefined): RunSt
 
 export function settleKakaoEvents(run: RunState): RunState {
   const known = new Set(run.kakaoAdded.map((entry) => entry.id));
-  return kakaoEvents.reduce<RunState>((acc, event) => {
+  const withScheduled = kakaoEvents.reduce<RunState>((acc, event) => {
     const at = (event.day - 1) * DAY_MIN + parseClock(event.time);
     if (at > acc.t || known.has(event.id)) return acc;
     known.add(event.id);
@@ -107,4 +108,13 @@ export function settleKakaoEvents(run: RunState): RunState {
     );
     return applyKakaoEffect(added, "effect" in event ? (event.effect as KakaoEffect) : undefined);
   }, run);
+  if (!withScheduled.storyEnding) return withScheduled;
+
+  const endingKnown = new Set(withScheduled.kakaoAdded.map((entry) => entry.id));
+  return endingEvents[withScheduled.storyEnding].reduce<RunState>((acc, event) => {
+    const at = (event.day - 1) * DAY_MIN + parseClock(event.time);
+    if (at > acc.t || endingKnown.has(event.id)) return acc;
+    endingKnown.add(event.id);
+    return addKakaoMessage(acc, event, at);
+  }, withScheduled);
 }

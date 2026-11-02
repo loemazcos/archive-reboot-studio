@@ -165,7 +165,7 @@ export const hiddenVideo = {
 };
 
 export const alarms = [
-  { id: "al1", time: "05:30", label: "알람", day: 8, clue: "C22", repeat: "매일" },
+  { id: "al1", time: "05:30", label: "선배 피하기용", day: 1, clue: "C22", repeat: "매일" },
   { id: "al2", time: "07:00", label: "기상", day: 1, repeat: "주중" },
   { id: "al3", time: "07:10", label: "진짜 기상", day: 1, repeat: "주중" },
 ];

@@ -9,6 +9,7 @@ import { openDoublesPrompt } from "@/state/doubles";
 import { chooseDoublesGo, chooseDoublesSick, finishRhythm } from "@/state/doublesActions";
 import RhythmTap from "@/components/apps/instagram/RhythmTap";
 import { sanghyukChoices, sanghyukEnding } from "@/data/story/sanghyuk";
+import { canSendD14Reply, recordD14Reply } from "@/state/endings";
 
 type Choice = "why" | "read";
 type ReplyPhase = "idle" | "typing" | "gap" | "done";
@@ -90,6 +91,7 @@ export default function SanghyukChat({ thread, live, typing, notice, onSend, onB
   const leaveLabel = sanghyukChoices.find((item) => item.id === "leave")?.label ?? "";
   const showChoices = answeredAt === null && !run.sanghyuk.ignored;
   const showEnding = choice === "why" && phase === "done";
+  const showD14Reply = canSendD14Reply(run);
 
   return (
     <div className="relative flex h-full flex-col">
@@ -275,6 +277,19 @@ export default function SanghyukChat({ thread, live, typing, notice, onSend, onB
             setRhythmId(null);
           }}
         />
+      )}
+
+      {showD14Reply && (
+        <button
+          type="button"
+          onClick={() => {
+            update(recordD14Reply);
+            onSend("…이제 답장해도 돼요?");
+          }}
+          className="mx-3 mb-2 h-10 rounded-full bg-[var(--card)] text-[14px] font-semibold text-[var(--fg)]"
+        >
+          …이제 답장해도 돼요?
+        </button>
       )}
 
       <form

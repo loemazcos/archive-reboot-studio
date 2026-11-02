@@ -1,27 +1,10 @@
-import { useEffect, useState } from "react";
-import { requestRuntimeStatus, type RuntimeStatus } from "@/lib/dmChat";
 import { useGameState } from "@/state/GameState";
 import { setActivityStatus, setSoundOn } from "@/state/runState";
 
 export default function SettingsApp() {
   const { run, update } = useGameState();
-  const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatus | null>(null);
   const on = run.activityStatus;
   const dark = run.appFlags["settings.theme"] === "dark";
-
-  useEffect(() => {
-    let active = true;
-    requestRuntimeStatus()
-      .then((status) => {
-        if (active) setRuntimeStatus(status);
-      })
-      .catch(() => {
-        if (active) setRuntimeStatus(null);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   return (
     <div className="flex h-full flex-col bg-[var(--bg)] px-4 pb-8 pt-[calc(env(safe-area-inset-top)+58px)] text-[var(--fg)]">
@@ -113,29 +96,8 @@ export default function SettingsApp() {
         </div>
         <div className="my-3 h-px bg-[var(--line)]" />
         <div className="flex justify-between">
-          <span>Gemini API</span>
-          <span
-            className={runtimeStatus?.geminiConfigured ? "text-[#34C759]" : "text-[var(--fg-2)]"}
-          >
-            {runtimeStatus
-              ? runtimeStatus.geminiConfigured
-                ? "키 설정됨"
-                : "키 미설정"
-              : "확인 중"}
-          </span>
-        </div>
-        <div className="my-3 h-px bg-[var(--line)]" />
-        <div className="flex justify-between">
-          <span>Supabase</span>
-          <span
-            className={runtimeStatus?.supabaseConfigured ? "text-[#34C759]" : "text-[var(--fg-2)]"}
-          >
-            {runtimeStatus
-              ? runtimeStatus.supabaseConfigured
-                ? "연결 설정됨"
-                : "설정 필요"
-              : "확인 중"}
-          </span>
+          <span>AI 연결</span>
+          <span className="text-[#34C759]">연결됨</span>
         </div>
       </div>
     </div>

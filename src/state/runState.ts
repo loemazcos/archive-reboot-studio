@@ -22,6 +22,11 @@ import {
   type CallScript,
 } from "@/state/calls";
 import { clampStat } from "@/state/stats";
+import {
+  canUnlockTrueEnding,
+  endingForFestivalOutcome,
+  type FestivalOutcome,
+} from "@/state/endings";
 import { CAPTURE_BATTERY, CAPTURE_MINUTES, pushCapture, type Capture } from "@/state/captures";
 import {
   CHARGED_BATTERY,
@@ -46,6 +51,8 @@ export const CLUE_FIRST_DM = "C01";
 export const CLUE_MEMO_APP = "C17";
 export const CLUE_REMIT = "C19";
 export const ENDING_A0 = "A-0";
+export type StoryEnding = "A" | "B1" | "B2" | "B3" | "D" | "C";
+export type EndingPartner = "donghyun" | "jaehyun" | "seongho" | "none";
 
 export type SanghyukState = {
   openedAt: number | null;
@@ -84,6 +91,8 @@ export type RunState = {
   notices: Notice[];
   notificationsCleared: boolean;
   codex: string[];
+  storyEnding: StoryEnding | null;
+  endingPartner: EndingPartner | null;
   social: SocialState;
   consult: ConsultState;
   kakaoAdded: KakaoAddition[];
@@ -138,6 +147,8 @@ export const DEFAULT_RUN: RunState = {
   appFlags: {},
   notificationsCleared: false,
   codex: [],
+  storyEnding: null,
+  endingPartner: null,
   social: DEFAULT_SOCIAL,
   consult: DEFAULT_CONSULT,
   kakaoAdded: [],
@@ -512,13 +523,41 @@ export function answerCall(run: RunState): RunState {
   };
 }
 
+export function beginTrueEndingCall(run: RunState): RunState {
+  if (
+    run.day !== 15 ||
+    run.t % DAY_MIN < 20 * 60 + 50 ||
+    run.storyEnding !== null ||
+    !canUnlockTrueEnding(run)
+  ) {
+    return run;
+  }
+  return {
+    ...run,
+    storyEnding: "D",
+    callsDone: [...run.callsDone, "d15-call"],
+    activeCall: { id: "d15-direct-call", step: 0, picks: [] },
+  };
+}
+
+function finishFestivalOutcome(run: RunState, outcome: FestivalOutcome): RunState {
+  if (run.day !== 15 || run.storyEnding !== null) return run;
+  const storyEnding = endingForFestivalOutcome(run, outcome);
+  return storyEnding ? { ...run, storyEnding } : run;
+}
+
 export function declineCall(run: RunState): RunState {
   const call = incomingCall(run);
-  return call ? missCall(run, call) : run;
+  if (!call) return run;
+  return call.id === "d15-call"
+    ? finishFestivalOutcome(missCall(run, call), "declined")
+    : missCall(run, call);
 }
 
 export function hangUpCall(run: RunState): RunState {
-  return { ...run, activeCall: null };
+  const callId = run.activeCall?.id;
+  const next = { ...run, activeCall: null };
+  return callId === "d15-call" ? finishFestivalOutcome(next, "declined") : next;
 }
 
 function dropCall(run: RunState): RunState {
@@ -576,6 +615,10 @@ export function stepCall(run: RunState, choice: number | null): RunState {
     nextIndex >= (call.steps?.length ?? 0) || advanced.booted || advanced.day !== run.day;
   return {
     ...advanced,
+    storyEnding:
+      call.id === "d15-call" && ended
+        ? (endingForFestivalOutcome(advanced, "answered") ?? advanced.storyEnding)
+        : advanced.storyEnding,
     activeCall: ended ? null : { ...(withEffects.activeCall ?? active), step: nextIndex },
   };
 }

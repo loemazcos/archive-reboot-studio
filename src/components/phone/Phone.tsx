@@ -28,11 +28,13 @@ import { useGameClock } from "@/hooks/useGameClock";
 import { isNightTime } from "@/lib/gameTime";
 import { playSound, unlockAudio, vibrate } from "@/lib/sound";
 import { CALL_MIN_BATTERY, canCallBack, findCall, incomingCall } from "@/state/calls";
+import { canUnlockTrueEnding } from "@/state/endings";
 import { fetchDmRows } from "@/lib/dmChat";
 import { remainingMinutes } from "@/lib/remit";
 import { useGameState } from "@/state/GameState";
 import {
   answerCall,
+  beginTrueEndingCall,
   callBack,
   captureScreen,
   chargePhone,
@@ -389,6 +391,23 @@ export default function Phone() {
               className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+112px)] z-[54] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[#34C759] px-4 py-2 text-[13px] font-semibold text-white transition-transform active:scale-95"
             >
               상혁에게 다시 걸기
+            </button>
+          ) : null}
+
+          {!locked &&
+          !run.activeCall &&
+          run.storyEnding === null &&
+          canUnlockTrueEnding(run) &&
+          run.day === 15 &&
+          minutesIntoDay(run) >= 20 * 60 + 50 &&
+          minutesIntoDay(run) < 21 * 60 + 14 ? (
+            <button
+              type="button"
+              onClick={() => update(beginTrueEndingCall)}
+              className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+160px)] z-[54] flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[#34C759] px-4 py-2 text-[13px] font-semibold text-white transition-transform active:scale-95"
+            >
+              <Clock3 size={15} aria-hidden="true" />
+              상혁에게 먼저 전화하기
             </button>
           ) : null}
 

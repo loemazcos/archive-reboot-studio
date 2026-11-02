@@ -11,6 +11,7 @@ export type CallScript = {
   day: number;
   time: string;
   kind: "live" | "missed";
+  outgoing?: boolean;
   caller?: string;
   count?: number;
   steps?: CallStep[];
@@ -41,7 +42,7 @@ export function incomingCall(
   if (run.activeCall) return null;
   return (
     callList.find((call) => {
-      if (call.kind !== "live" || run.callsDone.includes(call.id)) return false;
+      if (call.kind !== "live" || call.outgoing || run.callsDone.includes(call.id)) return false;
       const at = callAt(call);
       return run.t >= at && run.t < at + RING_WINDOW;
     }) ?? null
@@ -86,10 +87,15 @@ export function settleCalls(run: RunState): RunState {
   const expired = run.droppedAt !== null && run.t > run.droppedAt + CALLBACK_WINDOW;
   const cleared = expired ? { ...run, droppedAt: null, droppedCall: null } : run;
   return callList.reduce<RunState>((acc, call) => {
-    if (acc.callsDone.includes(call.id)) return acc;
+    if (call.outgoing || acc.callsDone.includes(call.id)) return acc;
     const at = callAt(call);
     if (call.kind === "missed" && acc.t >= at) return missCall(acc, call);
-    if (call.kind === "live" && acc.t >= at + RING_WINDOW) return missCall(acc, call);
+    if (call.kind === "live" && acc.t >= at + RING_WINDOW) {
+      const missed = missCall(acc, call);
+      return call.id === "d15-call"
+        ? { ...missed, storyEnding: acc.dnd ? "B2" : "B1" }
+        : missed;
+    }
     return acc;
   }, run);
 }

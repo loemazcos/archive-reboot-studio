@@ -48,11 +48,6 @@ export type DmReply = {
 };
 export type DmCallbackKey = "erasedThrice" | "dndNight";
 export type DmCallbackResult = { delivered: boolean; text?: string; mindDelta?: number };
-export type RuntimeStatus = {
-  geminiConfigured: boolean;
-  gatewayConfigured: boolean;
-  supabaseConfigured: boolean;
-};
 
 export function formatGameTime(t: number) {
   const minute = ((t % 1440) + 1440) % 1440;
@@ -130,18 +125,4 @@ export async function requestDmCallback(key: DmCallbackKey): Promise<DmCallbackR
   const data = await callFunction<DmCallbackResult>("dm-reply", { callback: key });
   if (typeof data.delivered !== "boolean") throw new Error("메시지를 확인하지 못했어요.");
   return data;
-}
-
-export async function requestRuntimeStatus(): Promise<RuntimeStatus> {
-  const data = await callFunction<unknown>("dm-reply", { action: "runtimeStatus" });
-  if (!data || typeof data !== "object") throw new Error("상태를 확인하지 못했어요.");
-  const status = data as Partial<RuntimeStatus>;
-  if (
-    typeof status.geminiConfigured !== "boolean" ||
-    typeof status.gatewayConfigured !== "boolean" ||
-    typeof status.supabaseConfigured !== "boolean"
-  ) {
-    throw new Error("상태를 확인하지 못했어요.");
-  }
-  return status as RuntimeStatus;
 }

@@ -30,6 +30,26 @@ export const calls = [
     ],
   },
   {
+    id: "d15-direct-call",
+    day: 15,
+    time: "20:50",
+    kind: "live",
+    outgoing: true,
+    caller: "태산",
+    steps: [
+      { type: "say", who: "상혁", text: "…여보세요" },
+      {
+        type: "choose",
+        options: [
+          { label: "선배, 저 태산인데요", mind: 0, courage: 0, reply: "선배, 저 태산인데요" },
+          { label: "제가 먼저 걸었어요", mind: 0, courage: 0, reply: "제가 먼저 걸었어요" },
+        ],
+      },
+      { type: "say", who: "상혁", text: "알아 ㅋㅋ 이름 떴음. 나 지금 손 떨림" },
+      { type: "say", who: "상혁", text: "웃는 거 예쁘다고 한 거, 지금도 취소 안 해" },
+    ],
+  },
+  {
     id: "d15-call",
     day: 15,
     time: "21:14",
