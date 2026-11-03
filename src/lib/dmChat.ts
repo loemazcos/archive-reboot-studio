@@ -1,4 +1,5 @@
 import { callFunction } from "@/lib/gameApi";
+import type { RunState } from "@/state/runState";
 
 export type DmSender = "me" | "them" | "system";
 export type DmMessage = {
@@ -104,25 +105,44 @@ export async function fetchDmRows(): Promise<DmRow[]> {
   return data.dmMessages;
 }
 
-export async function openDmThreadOnServer(threadId: string): Promise<void> {
-  await callFunction("game-api", { action: "openThread", payload: { threadId } });
+export async function openDmThreadOnServer(threadId: string, now: number): Promise<void> {
+  await callFunction("game-api", { action: "openThread", payload: { threadId, now } });
 }
 
-export async function saveMyDmMessage(threadId: string, body: string): Promise<void> {
-  await callFunction("game-api", { action: "sendDm", payload: { threadId, body } });
+export async function saveMyDmMessage(threadId: string, body: string, now: number): Promise<void> {
+  await callFunction("game-api", { action: "sendDm", payload: { threadId, body, now } });
 }
 
 export async function requestDmReply(
   threadId: string,
   history: { from: "me" | "them"; text: string }[],
+  run: RunState,
+  otherHistory: { threadId: string; from: "me" | "them"; text: string }[] = [],
 ): Promise<DmReply> {
-  const data = await callFunction<unknown>("dm-reply", { threadId, history });
+  const data = await callFunction<unknown>("dm-reply", { threadId, history, run, otherHistory });
   if (!isDmReply(data)) throw new Error("답장이 도착하지 않았어요. 다시 보내 주세요.");
+  await callFunction("game-api", {
+    action: "addDmReplies",
+    payload: { threadId, messages: data.messages, now: run.t, read_now: data.read_now },
+  });
   return data;
 }
 
-export async function requestDmCallback(key: DmCallbackKey): Promise<DmCallbackResult> {
-  const data = await callFunction<DmCallbackResult>("dm-reply", { callback: key });
+export async function requestDmCallback(
+  key: DmCallbackKey,
+  run: RunState,
+): Promise<DmCallbackResult> {
+  const data = await callFunction<DmCallbackResult>("dm-reply", { callback: key, run });
   if (typeof data.delivered !== "boolean") throw new Error("메시지를 확인하지 못했어요.");
+  if (data.delivered && data.text) {
+    await callFunction("game-api", {
+      action: "addDmReplies",
+      payload: {
+        threadId: "sanghyuk",
+        messages: [{ text: data.text, delay_min: 0, unsend_after_min: null, typing_cycles: 0 }],
+        now: run.t,
+      },
+    });
+  }
   return data;
 }

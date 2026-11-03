@@ -10,6 +10,7 @@ import {
   type DmRow,
   type DmThread,
 } from "@/lib/dmChat";
+import type { RunState } from "@/state/runState";
 
 type Status = "loading" | "ready" | "error";
 type SendHandlers = { onSent: () => void; onReply: (reply: DmReply) => void };
@@ -54,16 +55,23 @@ export function useDmStore(now: number) {
     return [...thread.messages, ...rowsFor(thread.id).map((row) => rowToMessage(row, thread.name))];
   }
 
-  async function openThread(threadId: string) {
+  async function openThread(threadId: string, at: number) {
     try {
-      await openDmThreadOnServer(threadId);
+      await openDmThreadOnServer(threadId, at);
     } catch {
       setNotice({ threadId, text: "대화를 여는 중 연결이 끊겼어요. 다시 열어 주세요." });
     }
     await refresh();
   }
 
-  async function send(thread: DmThread, text: string, handlers: SendHandlers) {
+  async function send(
+    thread: DmThread,
+    text: string,
+    handlers: SendHandlers,
+    visibleHistory?: DmMessage[],
+    run?: RunState,
+    otherHistory: { threadId: string; from: "me" | "them"; text: string }[] = [],
+  ) {
     if (status !== "ready" || pendingId) return;
     setPendingId(thread.id);
     setNotice(null);
@@ -84,7 +92,7 @@ export function useDmStore(now: number) {
     setRows((current) => [...current, optimistic]);
 
     try {
-      await saveMyDmMessage(thread.id, text);
+      await saveMyDmMessage(thread.id, text, now);
     } catch {
       setNotice({ threadId: thread.id, text: "메시지를 보내지 못했어요. 연결을 확인해 주세요." });
       setRows((current) => current.filter((row) => row !== optimistic));
@@ -95,15 +103,13 @@ export function useDmStore(now: number) {
     void refresh();
 
     try {
-      const history = [
-        ...thread.messages,
-        ...rowsFor(thread.id).map((row) => rowToMessage(row, thread.name)),
-        { from: "me" as const, text },
-      ]
+      const history = [...(visibleHistory ?? messagesFor(thread)), { from: "me" as const, text }]
         .filter((message) => message.from !== "system")
+        .filter((message) => message.at === undefined || message.at <= now)
         .slice(-30)
         .map((message) => ({ from: message.from as "me" | "them", text: message.text }));
-      const reply = await requestDmReply(thread.id, history);
+      if (!run) throw new Error("게임 상태를 불러오지 못했어요.");
+      const reply = await requestDmReply(thread.id, history, run, otherHistory);
       handlers.onReply(reply);
 
       let offset = 0;

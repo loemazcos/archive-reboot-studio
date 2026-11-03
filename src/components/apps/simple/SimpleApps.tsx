@@ -393,34 +393,102 @@ function ProductDetail({
   price,
   note,
   onBack,
+  inCart,
+  onToggleCart,
+  onPurchase,
 }: {
   shop: string;
   name: string;
   price: string;
   note?: string;
   onBack: () => void;
+  inCart: boolean;
+  onToggleCart: () => void;
+  onPurchase: () => void;
 }) {
-  const [liked, setLiked] = useState(true);
+  const [notice, setNotice] = useState("");
   return (
     <Detail title={shop} onBack={onBack}>
       <b>{name}</b>
       {"\n"}
       {price}
       {note ? `\n\n${note}` : ""}
-      {"\n\n"}
-      <button
-        type="button"
-        onClick={() => setLiked(!liked)}
-        className="rounded-full bg-[var(--card)] px-4 py-2 text-[14px] font-semibold"
-      >
-        {liked ? "♥ 찜 해제" : "♡ 찜하기"}
-      </button>
+      <div className="mt-5 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={onToggleCart}
+          className="h-11 rounded-[10px] bg-[var(--bg)] text-[14px] font-semibold"
+        >
+          {inCart ? "장바구니에서 빼기" : "장바구니 담기"}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            onPurchase();
+            setNotice("주문이 접수됐어요. 결제는 진행되지 않았어요.");
+          }}
+          className="h-11 rounded-[10px] bg-[#111111] text-[14px] font-semibold text-white"
+        >
+          구매하기
+        </button>
+      </div>
+      {notice ? (
+        <p role="status" className="mt-3 text-[13px] text-[var(--accent)]">
+          {notice}
+        </p>
+      ) : null}
     </Detail>
   );
 }
 
+function readFlagList(value: string | undefined): string[] {
+  try {
+    const parsed: unknown = value ? JSON.parse(value) : [];
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+type MarketChatMessage = { from: "me" | "seller"; text: string };
+
+function readMarketChat(value: string | undefined): MarketChatMessage[] {
+  try {
+    const parsed: unknown = value ? JSON.parse(value) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter(
+          (message): message is MarketChatMessage =>
+            Boolean(message) &&
+            typeof message === "object" &&
+            ((message as MarketChatMessage).from === "me" ||
+              (message as MarketChatMessage).from === "seller") &&
+            typeof (message as MarketChatMessage).text === "string",
+        )
+      : [];
+  } catch {
+    return [];
+  }
+}
+
 export function ShopAApp() {
+  const { run, update } = useGameState();
   const [open, setOpen] = useState<(typeof shopA)[number] | null>(null);
+  const [tab, setTab] = useState("ranking");
+  const cart = readFlagList(run.appFlags["store.cart.shopA"]);
+  const likes = readFlagList(run.appFlags["store.likes.shopA"]);
+  const rows =
+    tab === "cart"
+      ? shopA.filter((item) => cart.includes(item.id))
+      : tab === "likes"
+        ? shopA.filter((item) => likes.includes(item.id) || item.tag === "좋아요")
+        : tab === "recent"
+          ? shopA.filter((item) => item.tag === "최근 본 상품")
+          : shopA;
+  function toggleList(key: string, id: string) {
+    const list = readFlagList(run.appFlags[key]);
+    const next = list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
+    update((current) => setAppFlag(current, key, JSON.stringify(next)));
+  }
   if (open)
     return (
       <ProductDetail
@@ -429,31 +497,60 @@ export function ShopAApp() {
         price={open.price}
         note={open.note}
         onBack={() => setOpen(null)}
+        inCart={cart.includes(open.id)}
+        onToggleCart={() => toggleList("store.cart.shopA", open.id)}
+        onPurchase={() => toggleList("store.cart.shopA", open.id)}
       />
     );
   return (
-    <AppShell title="무신사">
-      {(["장바구니", "최근 본 상품", "좋아요"] as const).map((tag) => (
-        <Group key={tag} label={tag}>
-          {shopA
-            .filter((item) => item.tag === tag)
-            .map((item) => (
-              <Row
-                key={item.id}
-                title={item.name}
-                sub={item.note}
-                right={item.price}
-                onClick={() => setOpen(item)}
-              />
-            ))}
-        </Group>
-      ))}
-    </AppShell>
+    <div className="flex h-full flex-col">
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <AppShell title="무신사">
+          <div className="mb-4 rounded-[12px] bg-[#171717] px-4 py-5 text-white">
+            <p className="text-[12px] text-white/65">BONEGO STYLE</p>
+            <p className="mt-1 text-[20px] font-bold">이번 주 교내 랭킹</p>
+            <p className="mt-1 text-[13px] text-white/70">축제 준비 아이템을 모아봤어요</p>
+          </div>
+          <Group label={tab === "cart" ? `장바구니 ${cart.length}` : "추천 상품"}>
+            {rows.length ? (
+              rows.map((item, index) => (
+                <Row
+                  key={item.id}
+                  title={item.name}
+                  sub={`${tab === "ranking" ? `${index + 1}위 · ` : ""}${item.note ?? item.tag}`}
+                  right={item.price}
+                  onClick={() => setOpen(item)}
+                />
+              ))
+            ) : (
+              <p className="px-3 py-5 text-[14px] text-[var(--fg-2)]">상품이 없어요.</p>
+            )}
+          </Group>
+        </AppShell>
+      </div>
+      <Tabs
+        tabs={[
+          { id: "ranking", label: "랭킹" },
+          { id: "recent", label: "최근" },
+          { id: "likes", label: "좋아요" },
+          { id: "cart", label: `장바구니 ${cart.length}` },
+        ]}
+        value={tab}
+        onChange={setTab}
+      />
+    </div>
   );
 }
 
 export function ShopBApp() {
+  const { run, update } = useGameState();
   const [open, setOpen] = useState<(typeof shopB)[number] | null>(null);
+  const [tab, setTab] = useState("recommend");
+  const cart = readFlagList(run.appFlags["store.cart.shopB"]);
+  function toggleCart(id: string) {
+    const next = cart.includes(id) ? cart.filter((item) => item !== id) : [...cart, id];
+    update((current) => setAppFlag(current, "store.cart.shopB", JSON.stringify(next)));
+  }
   if (open)
     return (
       <ProductDetail
@@ -461,23 +558,119 @@ export function ShopBApp() {
         name={open.name}
         price={open.price}
         onBack={() => setOpen(null)}
+        inCart={cart.includes(open.id)}
+        onToggleCart={() => toggleCart(open.id)}
+        onPurchase={() => toggleCart(open.id)}
       />
     );
   return (
-    <AppShell title="에이블리">
-      <Group label="찜한 상품">
-        {shopB.map((item) => (
-          <Row key={item.id} title={item.name} right={item.price} onClick={() => setOpen(item)} />
-        ))}
-      </Group>
-    </AppShell>
+    <div className="flex h-full flex-col">
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <AppShell title="에이블리">
+          <div className="mb-4 rounded-[12px] bg-[#f7dce2] px-4 py-5 text-[#3d2930]">
+            <p className="text-[12px]">BONEGO FESTIVAL</p>
+            <p className="mt-1 text-[20px] font-bold">축제 코디 모음</p>
+            <p className="mt-1 text-[13px]">가볍게 둘러보고 마음에 드는 옷을 담아보세요</p>
+          </div>
+          <Group label={tab === "cart" ? `장바구니 ${cart.length}` : "인기 상품"}>
+            {(tab === "cart" ? shopB.filter((item) => cart.includes(item.id)) : shopB).map(
+              (item) => (
+                <Row
+                  key={item.id}
+                  title={item.name}
+                  sub="후기 4.8 · 무료배송"
+                  right={item.price}
+                  onClick={() => setOpen(item)}
+                />
+              ),
+            )}
+          </Group>
+        </AppShell>
+      </div>
+      <Tabs
+        tabs={[
+          { id: "recommend", label: "추천" },
+          { id: "cart", label: `장바구니 ${cart.length}` },
+        ]}
+        value={tab}
+        onChange={setTab}
+      />
+    </div>
   );
 }
 
 /* ---------------- 당근 ---------------- */
 export function MarketApp() {
-  const { visible, reveal } = useStory();
+  const { visible, reveal, run, update } = useStory();
   const [open, setOpen] = useState<(typeof market)[number] | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [draft, setDraft] = useState("");
+  const chat = open ? readMarketChat(run.appFlags[`market.chat.${open.id}`]) : [];
+  if (open && chatOpen)
+    return (
+      <div className="flex h-full flex-col bg-[var(--bg)] text-[var(--fg)]">
+        <header className="flex items-center gap-3 border-b border-[var(--line)] px-4 pb-3 pt-[calc(env(safe-area-inset-top)+58px)]">
+          <button type="button" onClick={() => setChatOpen(false)} className="text-[15px] text-[var(--accent)]">
+            닫기
+          </button>
+          <div className="min-w-0 flex-1 text-center">
+            <p className="truncate text-[15px] font-semibold">보넥동 이웃</p>
+            <p className="text-[11px] text-[var(--fg-2)]">{open.title}</p>
+          </div>
+          <span className="w-8" aria-hidden="true" />
+        </header>
+        <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
+          <p className="my-2 text-center text-[12px] text-[var(--fg-2)]">판매자와의 채팅</p>
+          {chat.map((message, index) => (
+            <p
+              key={`${index}-${message.text}`}
+              className={`max-w-[82%] rounded-[16px] px-3.5 py-2.5 text-[14px] leading-5 ${
+                message.from === "me"
+                  ? "self-end rounded-br-[5px] bg-[#ff8f3d] text-white"
+                  : "self-start rounded-bl-[5px] bg-[var(--card)]"
+              }`}
+            >
+              {message.text}
+            </p>
+          ))}
+        </div>
+        <form
+          className="flex items-center gap-2 border-t border-[var(--line)] px-3 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const text = draft.trim();
+            if (!text) return;
+            const next: MarketChatMessage[] = [
+              ...chat,
+              { from: "me", text },
+              {
+                from: "seller",
+                text: open.deleted
+                  ? "글이 삭제되어 거래할 수 없어요."
+                  : "네, 아직 있어요. 편하실 때 보러 오셔도 돼요.",
+              },
+            ];
+            update((current) => setAppFlag(current, `market.chat.${open.id}`, JSON.stringify(next)));
+            setDraft("");
+          }}
+        >
+          <input
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            maxLength={300}
+            placeholder="메시지 보내기"
+            className="h-10 flex-1 rounded-full bg-[var(--card)] px-4 text-[14px] outline-none"
+          />
+          <button
+            type="submit"
+            disabled={!draft.trim()}
+            className="h-10 rounded-full bg-[#ff8f3d] px-4 text-[14px] font-semibold text-white disabled:opacity-40"
+          >
+            보내기
+          </button>
+        </form>
+      </div>
+    );
   if (open)
     return (
       <Detail title="당근" onBack={() => setOpen(null)}>
@@ -486,6 +679,17 @@ export function MarketApp() {
         {open.place}
         {"\n\n"}
         {open.note ?? open.price}
+        <button
+          type="button"
+          disabled={open.deleted}
+          onClick={() => setChatOpen(true)}
+          className="mt-5 h-11 w-full rounded-[10px] bg-[#ff8f3d] text-[14px] font-semibold text-white disabled:opacity-45"
+        >
+          {open.deleted ? "삭제된 게시글" : "판매자와 채팅하기"}
+        </button>
+        {chat.length > 0 ? (
+          <p className="mt-2 text-[12px] text-[var(--fg-2)]">이전 채팅 {chat.length}개 메시지</p>
+        ) : null}
       </Detail>
     );
   return (
@@ -502,6 +706,7 @@ export function MarketApp() {
               right={item.price}
               onClick={() => {
                 reveal(item);
+                setChatOpen(false);
                 setOpen(item);
               }}
             />
@@ -519,31 +724,39 @@ export function MusicApp() {
     .slice()
     .sort((a, b) => b.plays - a.plays);
   return (
-    <AppShell title="최근 재생">
-      {playing ? (
-        <div className="mt-2 flex items-center gap-3 rounded-[18px] bg-[var(--card)] p-4">
-          <Play size={22} aria-hidden="true" />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[15px] font-semibold">{playing.title}</p>
-            <p className="text-[12px] text-[var(--fg-2)]">{playing.note ?? playing.artist}</p>
-          </div>
+    <SpotifyApp>
+      <section className="border-t border-white/10 px-4 pb-8 pt-5">
+        <h2 className="mb-3 text-[17px] font-bold">최근 재생</h2>
+        <div className="space-y-1">
+          {list.map((song, index) => (
+            <button
+              key={song.id}
+              type="button"
+              onClick={() => {
+                reveal(song);
+                setPlaying(song);
+              }}
+              className="flex w-full items-center gap-3 rounded-md px-2 py-2.5 text-left active:bg-white/10"
+            >
+              <span className="w-5 text-right text-[13px] tabular-nums text-white/50">
+                {index + 1}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span
+                  className={`block truncate text-[14px] ${playing?.id === song.id ? "text-[#1ed760]" : "text-white"}`}
+                >
+                  {song.title}
+                </span>
+                <span className="block truncate text-[12px] text-white/55">
+                  {song.note ?? song.artist}
+                </span>
+              </span>
+              <span className="text-[12px] text-white/45">{song.plays}회</span>
+            </button>
+          ))}
         </div>
-      ) : null}
-      <Group label="많이 들은 곡">
-        {list.map((song, i) => (
-          <Row
-            key={song.id}
-            title={`${i + 1}. ${song.title}`}
-            sub={song.artist}
-            right={`${song.plays}회`}
-            onClick={() => {
-              reveal(song);
-              setPlaying(song);
-            }}
-          />
-        ))}
-      </Group>
-    </AppShell>
+      </section>
+    </SpotifyApp>
   );
 }
 
@@ -619,7 +832,9 @@ export function PhotosApp() {
             <div className="aspect-square rounded-[10px] bg-[var(--bg)]" />
             <p className="mt-2 text-[14px] font-semibold">{album.name}</p>
             <p className="text-[12px] text-[var(--fg-2)]">
-              {album.id === "recent" ? album.count + captures.length + cluePhotos.length : album.count}
+              {album.id === "recent"
+                ? album.count + captures.length + cluePhotos.length
+                : album.count}
             </p>
           </div>
         ))}

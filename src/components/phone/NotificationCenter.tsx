@@ -38,15 +38,15 @@ export default function NotificationCenter({
       <section
         className={
           top
-            ? "absolute inset-x-0 top-0 flex h-[92%] flex-col rounded-b-[28px] bg-[var(--glass)] px-4 pb-4 pt-[calc(env(safe-area-inset-top)+44px)] shadow-[0_12px_40px_rgba(0,0,0,0.2)] backdrop-blur-[24px] backdrop-saturate-[180%]"
-            : "absolute inset-x-0 bottom-0 flex h-[86%] flex-col rounded-t-[28px] bg-[var(--glass)] px-4 pb-8 pt-3 shadow-[0_-12px_40px_rgba(0,0,0,0.2)] backdrop-blur-[24px] backdrop-saturate-[180%]"
+            ? "absolute inset-x-0 top-0 flex h-[94%] flex-col rounded-b-[30px] bg-[var(--glass)] px-4 pb-6 pt-[calc(env(safe-area-inset-top)+52px)] shadow-[0_12px_40px_rgba(0,0,0,0.18)] backdrop-blur-[32px] backdrop-saturate-[180%]"
+            : "absolute inset-x-0 bottom-0 flex h-[86%] flex-col rounded-t-[30px] bg-[var(--glass)] px-4 pb-[calc(env(safe-area-inset-bottom)+28px)] pt-3 shadow-[0_-12px_40px_rgba(0,0,0,0.18)] backdrop-blur-[32px] backdrop-saturate-[180%]"
         }
         style={{
           transform: `translate3d(0, ${(1 - progress) * (top ? -100 : 100)}%, 0)`,
           transition: dragging ? "none" : "transform 450ms var(--spring)",
         }}
       >
-        {top ? null : <span className="mx-auto mb-2 h-1 w-9 rounded-full bg-[var(--fg-2)]" />}
+        <span className="mx-auto mb-2 h-[5px] w-9 rounded-full bg-[var(--fg-2)]/45" />
         <div className="flex items-end justify-between px-1 pt-2">
           <div>
             <p className="text-[13px] text-[var(--fg-2)]">{formatLockDate(now)}</p>
@@ -72,7 +72,7 @@ export default function NotificationCenter({
             스크린샷
           </button>
         ) : null}
-        <ul className="mt-5 flex flex-1 flex-col gap-2 overflow-y-auto">
+        <ul className="mt-5 flex flex-1 flex-col gap-2.5 overflow-y-auto">
           {items.length === 0 ? (
             <li className="py-10 text-center text-[15px] text-[var(--fg-2)]">
               새로운 알림이 없어요

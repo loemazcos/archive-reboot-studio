@@ -15,6 +15,8 @@ import DeadPhone from "@/components/phone/DeadPhone";
 import HomeScreen from "@/components/phone/HomeScreen";
 import IncomingCall from "@/components/phone/IncomingCall";
 import LockScreen from "@/components/phone/LockScreen";
+import MonthLaterSheet from "@/components/phone/MonthLaterSheet";
+import StoryEndingSheet from "@/components/phone/StoryEndingSheet";
 import NotificationBanner from "@/components/phone/NotificationBanner";
 import NotificationCenter from "@/components/phone/NotificationCenter";
 import SleepSheet from "@/components/phone/SleepSheet";
@@ -28,7 +30,12 @@ import { useGameClock } from "@/hooks/useGameClock";
 import { isNightTime } from "@/lib/gameTime";
 import { playSound, unlockAudio, vibrate } from "@/lib/sound";
 import { CALL_MIN_BATTERY, canCallBack, findCall, incomingCall } from "@/state/calls";
-import { canUnlockTrueEnding } from "@/state/endings";
+import {
+  canOpenCLastChapter,
+  canUnlockTrueEnding,
+  chooseCLastChapterEnding,
+  unlockCLastChapterStory,
+} from "@/state/endings";
 import { fetchDmRows } from "@/lib/dmChat";
 import { remainingMinutes } from "@/lib/remit";
 import { useGameState } from "@/state/GameState";
@@ -108,6 +115,7 @@ export default function Phone() {
   const [sheet, setSheet] = useState<SheetKind | null>(null);
   const [drag] = useState<Drag | null>(null);
   const [sleepOpen, setSleepOpen] = useState(false);
+  const [monthLaterDismissed, setMonthLaterDismissed] = useState(false);
   const [seenDay, setSeenDay] = useState(run.day);
   const [cutDay, setCutDay] = useState<number | null>(null);
   const [banner, setBanner] = useState<Notice | null>(null);
@@ -283,7 +291,7 @@ export default function Phone() {
           data-theme={dark ? "dark" : "light"}
           onPointerDown={handlePointerDown}
         >
-          <Wallpaper dim={dark} />
+          <Wallpaper dim={dark} mode={locked ? "lock" : "home"} />
           {locked ? null : (
             <HomeScreen
               now={now}
@@ -478,6 +486,35 @@ export default function Phone() {
               battery={run.battery}
               onStep={stepActiveCall}
               onHangUp={() => update(hangUpCall)}
+            />
+          ) : null}
+
+          {!locked && canOpenCLastChapter(run) && !monthLaterDismissed ? (
+            <MonthLaterSheet
+              run={run}
+              onUnlock={(person, code) =>
+                update((current) => unlockCLastChapterStory(current, person, code))
+              }
+              onChoose={(partner) =>
+                update((current) => chooseCLastChapterEnding(current, partner))
+              }
+              onClose={() => setMonthLaterDismissed(true)}
+            />
+          ) : null}
+
+          {!locked &&
+          (run.storyEnding === "A0" || run.day > 21) &&
+          run.storyEnding !== null &&
+          run.storyEnding !== "C" &&
+          run.appFlags["ending.presented"] !== "true" ? (
+            <StoryEndingSheet
+              ending={run.storyEnding}
+              onClose={() =>
+                update((current) => ({
+                  ...current,
+                  appFlags: { ...current.appFlags, "ending.presented": "true" },
+                }))
+              }
             />
           ) : null}
 

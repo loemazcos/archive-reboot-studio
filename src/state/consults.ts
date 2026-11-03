@@ -16,9 +16,14 @@ export type ConsultEffect = {
 export type ConsultState = {
   answered: Record<string, ConsultRoom>;
   unlocks: string[];
+  affinity: Record<ConsultRoom | "seongho", number>;
 };
 
-export const DEFAULT_CONSULT: ConsultState = { answered: {}, unlocks: [] };
+export const DEFAULT_CONSULT: ConsultState = {
+  answered: {},
+  unlocks: [],
+  affinity: { donghyun: 5, jaehyun: 5, seongho: 1 },
+};
 
 const MORNING_CLOSE_MIN = 7 * 60;
 

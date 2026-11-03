@@ -14,6 +14,10 @@ export function chooseConsult(run: RunState, room: ConsultRoom): RunState {
     consult: {
       answered: { ...run.consult.answered, [entry.no]: room },
       unlocks: effect.unlock ? [...run.consult.unlocks, effect.unlock] : run.consult.unlocks,
+      affinity: {
+        ...run.consult.affinity,
+        [room]: Math.min(10, (run.consult.affinity[room] ?? 0) + 1),
+      },
     },
     courage: clampStat(run.courage + (effect.courage ?? 0)),
     mind: clampStat(run.mind + (effect.mind ?? 0)),

@@ -92,9 +92,7 @@ export function settleCalls(run: RunState): RunState {
     if (call.kind === "missed" && acc.t >= at) return missCall(acc, call);
     if (call.kind === "live" && acc.t >= at + RING_WINDOW) {
       const missed = missCall(acc, call);
-      return call.id === "d15-call"
-        ? { ...missed, storyEnding: acc.dnd ? "B2" : "B1" }
-        : missed;
+      return call.id === "d15-call" ? { ...missed, storyEnding: acc.dnd ? "B2" : "B1" } : missed;
     }
     return acc;
   }, run);

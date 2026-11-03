@@ -20,6 +20,7 @@ export const PLAYLIST = [
     len: 192,
   },
 ];
+type PlaylistTrack = (typeof PLAYLIST)[number];
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
@@ -40,7 +41,13 @@ function Bars({ on }: { on: boolean }) {
   );
 }
 
-export default function SpotifyApp({ children }: { children?: ReactNode }) {
+export default function SpotifyApp({
+  children,
+  onTrackPlay,
+}: {
+  children?: ReactNode;
+  onTrackPlay?: (track: PlaylistTrack) => void;
+}) {
   const [index, setIndex] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
   const [pos, setPos] = useState(0);
@@ -60,13 +67,17 @@ export default function SpotifyApp({ children }: { children?: ReactNode }) {
   }, [playing, track]);
 
   const play = (i: number) => {
+    const selected = PLAYLIST[i]!;
+    onTrackPlay?.(selected);
     if (i === index) return setPlaying((p) => !p);
     setIndex(i);
     setPos(0);
     setPlaying(true);
   };
   const skip = (d: number) => {
-    setIndex((i) => ((i ?? 0) + d + PLAYLIST.length) % PLAYLIST.length);
+    const nextIndex = ((index ?? 0) + d + PLAYLIST.length) % PLAYLIST.length;
+    onTrackPlay?.(PLAYLIST[nextIndex]!);
+    setIndex(nextIndex);
     setPos(0);
     setPlaying(true);
   };

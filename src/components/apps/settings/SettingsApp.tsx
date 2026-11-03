@@ -1,10 +1,29 @@
+import { useEffect, useState } from "react";
+import { callFunction } from "@/lib/gameApi";
 import { useGameState } from "@/state/GameState";
 import { setActivityStatus, setSoundOn } from "@/state/runState";
 
 export default function SettingsApp() {
   const { run, update } = useGameState();
+  const [aiStatus, setAiStatus] = useState<"checking" | "connected" | "missing" | "error">(
+    "checking",
+  );
   const on = run.activityStatus;
   const dark = run.appFlags["settings.theme"] === "dark";
+
+  useEffect(() => {
+    let active = true;
+    callFunction<{ configured?: boolean }>("dm-reply", { status: true })
+      .then(({ configured }) => {
+        if (active) setAiStatus(configured ? "connected" : "missing");
+      })
+      .catch(() => {
+        if (active) setAiStatus("error");
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <div className="flex h-full flex-col bg-[var(--bg)] px-4 pb-8 pt-[calc(env(safe-area-inset-top)+58px)] text-[var(--fg)]">
@@ -97,7 +116,23 @@ export default function SettingsApp() {
         <div className="my-3 h-px bg-[var(--line)]" />
         <div className="flex justify-between">
           <span>AI 연결</span>
-          <span className="text-[#34C759]">연결됨</span>
+          <span
+            className={
+              aiStatus === "connected"
+                ? "text-[#34C759]"
+                : aiStatus === "checking"
+                  ? "text-[var(--fg-2)]"
+                  : "text-[#FF9F0A]"
+            }
+          >
+            {aiStatus === "connected"
+              ? "Gemini 연결됨"
+              : aiStatus === "checking"
+                ? "확인 중"
+                : aiStatus === "missing"
+                  ? "서버 키 설정 필요"
+                  : "상태 확인 실패"}
+          </span>
         </div>
       </div>
     </div>

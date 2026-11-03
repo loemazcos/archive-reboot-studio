@@ -76,12 +76,13 @@ export default function ControlCenter({
         onClick={onClose}
       />
       <section
-        className="absolute inset-x-0 top-0 flex h-[92%] flex-col gap-3 rounded-b-[32px] bg-[var(--glass)] px-4 pb-6 pt-[calc(env(safe-area-inset-top)+64px)] shadow-[0_12px_40px_rgba(0,0,0,0.2)] backdrop-blur-[24px] backdrop-saturate-[180%]"
+        className="absolute inset-2 flex flex-col gap-3 rounded-[36px] bg-[var(--glass)] px-4 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-[calc(env(safe-area-inset-top)+54px)] shadow-[0_12px_40px_rgba(0,0,0,0.2)] backdrop-blur-[32px] backdrop-saturate-[180%]"
         style={{
           transform: `translate3d(0, ${(progress - 1) * 100}%, 0)`,
           transition: dragging ? "none" : "transform 450ms var(--spring)",
         }}
       >
+        <span className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+14px)] h-[5px] w-9 -translate-x-1/2 rounded-full bg-[var(--fg-2)]/45" />
         <div className="grid grid-cols-2 gap-3">
           <div className="grid grid-cols-2 gap-x-2 gap-y-4 rounded-[22px] bg-[var(--card)] p-4">
             {CONNECTIVITY.map(({ id, label, icon: IconComp }) => (

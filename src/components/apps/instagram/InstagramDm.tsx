@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { ChevronLeft, Send } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Send } from "lucide-react";
 import { useReportScreen } from "@/components/phone/ScreenReport";
 import Avatar from "@/components/apps/Avatar";
 import SanghyukChat from "@/components/apps/instagram/SanghyukChat";
@@ -29,6 +29,7 @@ import { dmThreads as threadData, personalHistory } from "@/data/instagram";
 
 const dmThreads = threadData as DmThread[];
 const CALLBACK_KEYS: DmCallbackKey[] = ["erasedThrice", "dndNight"];
+const CALLBACK_TEXT = { erasedThrice: "쓰다 지웠냐.", dndNight: "…방해금지냐." };
 const CONSULT_ROOMS: string[] = ["donghyun", "jaehyun"];
 
 function threadNameOf(threadId: string) {
@@ -41,6 +42,7 @@ export default function InstagramDm({ initialThreadId }: Props) {
   const { run, update } = useGameState();
   const store = useDmStore(run.t);
   const [activeId, setActiveId] = useState<string | null>(initialThreadId);
+  const callbackRequests = useRef(new Set<DmCallbackKey>());
 
   const active = dmThreads.find((thread) => thread.id === activeId) ?? null;
   const { refresh } = store;
@@ -56,17 +58,56 @@ export default function InstagramDm({ initialThreadId }: Props) {
       time: message.time,
       at: kakaoAt(message.date, message.time),
     }));
-    return [...store.messagesFor(thread), ...scripted].sort((a, b) => (a.at ?? 0) - (b.at ?? 0));
+    return [...store.messagesFor(thread), ...scripted]
+      .filter((message) => message.at === undefined || message.at <= run.t)
+      .sort((a, b) => (a.at ?? 0) - (b.at ?? 0));
+  }
+
+  function otherHistoryOf(threadId: string) {
+    const stored = store.rows
+      .filter(
+        (row) => row.thread_id !== threadId && row.deliver_at <= run.t && row.status !== "unsent",
+      )
+      .map((row) => ({
+        threadId: row.thread_id,
+        from: row.sender,
+        text: row.body,
+        at: row.deliver_at,
+      }));
+    const scripted = run.kakaoAdded
+      .filter(
+        (message) =>
+          message.room !== threadId &&
+          ["sanghyuk", "donghyun", "jaehyun", "seongho"].includes(message.room),
+      )
+      .map((message) => ({
+        threadId: message.room,
+        from: message.from === "me" ? ("me" as const) : ("them" as const),
+        text: message.text ?? "",
+        at: kakaoAt(message.date, message.time),
+      }))
+      .filter((message) => message.at <= run.t);
+    return [...stored, ...scripted]
+      .sort((a, b) => a.at - b.at)
+      .slice(-8)
+      .map(({ threadId: otherThread, from, text }) => ({ threadId: otherThread, from, text }));
   }
 
   useEffect(() => {
-    const pending = CALLBACK_KEYS.filter((key) => run.morning[key]);
+    const pending = CALLBACK_KEYS.filter(
+      (key) =>
+        run.morning[key] &&
+        !callbackRequests.current.has(key) &&
+        !store.rows.some((row) => row.thread_id === "sanghyuk" && row.body === CALLBACK_TEXT[key]),
+    );
     if (pending.length === 0) return;
+    pending.forEach((key) => callbackRequests.current.add(key));
     let mounted = true;
     (async () => {
       let delivered = false;
       for (const key of pending) {
-        const result = await requestDmCallback(key).catch(() => null);
+        const result = await requestDmCallback(key, run).catch(() => null);
+        if (!result) callbackRequests.current.delete(key);
         if (!mounted || !result?.delivered) continue;
         delivered = true;
         update((current) =>
@@ -78,7 +119,7 @@ export default function InstagramDm({ initialThreadId }: Props) {
     return () => {
       mounted = false;
     };
-  }, [run.morning, refresh, update]);
+  }, [run, store.rows, refresh, update]);
 
   useEffect(() => {
     const fresh = store.rows.filter(
@@ -115,7 +156,7 @@ export default function InstagramDm({ initialThreadId }: Props) {
       return thread.id === "sanghyuk" ? openSanghyukRoom(opened) : opened;
     });
     setActiveId(thread.id);
-    void store.openThread(thread.id);
+    void store.openThread(thread.id, run.t);
   }
 
   useEffect(() => () => update(leaveThread), [update]);
@@ -146,10 +187,17 @@ export default function InstagramDm({ initialThreadId }: Props) {
         typing={store.typingId === active.id}
         notice={store.notice?.threadId === active.id ? store.notice.text : null}
         onSend={(text) =>
-          void store.send(active, text, {
-            onSent: () => update((current) => sendDm(current, active.id)),
-            onReply: (reply) => update((current) => applyDmEffects(current, reply.effects)),
-          })
+          void store.send(
+            active,
+            text,
+            {
+              onSent: () => update((current) => sendDm(current, active.id)),
+              onReply: (reply) => update((current) => applyDmEffects(current, reply.effects)),
+            },
+            messagesOf(active),
+            run,
+            otherHistoryOf(active.id),
+          )
         }
         onBack={() => {
           setActiveId(null);
@@ -175,10 +223,17 @@ export default function InstagramDm({ initialThreadId }: Props) {
           update(leaveThread);
         }}
         onSend={(text) =>
-          void store.send(active, text, {
-            onSent: () => update((current) => sendDm(current, active.id)),
-            onReply: (reply) => update((current) => applyDmEffects(current, reply.effects)),
-          })
+          void store.send(
+            active,
+            text,
+            {
+              onSent: () => update((current) => sendDm(current, active.id)),
+              onReply: (reply) => update((current) => applyDmEffects(current, reply.effects)),
+            },
+            messagesOf(active),
+            run,
+            otherHistoryOf(active.id),
+          )
         }
       />
     );
@@ -186,26 +241,26 @@ export default function InstagramDm({ initialThreadId }: Props) {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center gap-3 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+58px)]">
-        <p className="flex-1 text-center text-[17px] font-semibold">DM</p>
-        <span className="w-7" aria-hidden="true" />
+      <header className="flex items-center gap-3 px-5 pb-4 pt-[calc(env(safe-area-inset-top)+58px)]">
+        <p className="flex-1 text-[26px] font-bold leading-tight">메시지</p>
+        <span className="text-[13px] text-[var(--fg-2)]">인스타그램</span>
       </header>
-      <ul className="flex flex-1 flex-col overflow-y-auto pan-y-scroll">
+      <ul className="pan-y-scroll flex flex-1 flex-col overflow-y-auto px-4 pb-4">
         {dmThreads.map((thread) => {
           const last = [...messagesOf(thread)]
             .reverse()
             .find((message) => message.from !== "system");
           return (
-            <li key={thread.id}>
+            <li key={thread.id} className="border-b border-[var(--line)] last:border-b-0">
               <button
                 type="button"
                 onClick={() => openThread(thread)}
-                className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors active:bg-[var(--card)]"
+                className="flex min-h-[92px] w-full items-center gap-4 rounded-[16px] px-3 py-4 text-left transition-colors active:bg-[var(--card)]"
               >
-                <Avatar photo={thread.avatar} label={thread.name} size={52} />
+                <Avatar photo={thread.avatar} label={thread.name} size={58} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[15px] font-semibold">{thread.name}</p>
-                  <p className="truncate text-[13px] text-[var(--fg-2)]">
+                  <p className="text-[16px] font-semibold">{thread.name}</p>
+                  <p className="mt-1 truncate text-[14px] text-[var(--fg-2)]">
                     {last
                       ? last.from === "me"
                         ? `나: ${last.text}`
@@ -213,7 +268,10 @@ export default function InstagramDm({ initialThreadId }: Props) {
                       : "대화를 시작해 보세요"}
                   </p>
                 </div>
-                <p className="shrink-0 text-[11px] text-[var(--fg-2)]">{thread.activity}</p>
+                <div className="flex shrink-0 items-center gap-1 text-[12px] text-[var(--fg-2)]">
+                  <span>{thread.activity}</span>
+                  <ChevronRight size={16} aria-hidden="true" />
+                </div>
               </button>
             </li>
           );
@@ -316,7 +374,7 @@ function ChatView({
         </div>
       )}
 
-      <div className="pan-y-scroll flex flex-1 flex-col gap-1.5 overflow-y-auto px-3 py-3">
+      <div className="pan-y-scroll flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
         {status === "loading" && (
           <p className="my-2 text-center text-[11px] text-[var(--fg-2)]">
             대화를 불러오는 중이에요
@@ -348,7 +406,7 @@ function ChatView({
               className={`flex flex-col ${mine ? "items-end" : "items-start"}`}
             >
               <p
-                className={`max-w-[75%] rounded-[18px] px-3.5 py-2 text-[15px] leading-[1.4] ${tail} ${
+                className={`max-w-[78%] rounded-[20px] px-3.5 py-2.5 text-[15px] leading-[1.5] ${tail} ${
                   mine
                     ? "bg-[#0A84FF] text-white"
                     : "bg-[#E9E9EB] text-[#1C1C1E] dark:bg-[#26262B] dark:text-[#F2F2F7]"

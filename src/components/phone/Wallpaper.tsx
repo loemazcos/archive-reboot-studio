@@ -1,24 +1,19 @@
-const wallpapers = import.meta.glob<string>("../../assets/images/background/*.jpg", {
-  eager: true,
-  query: "?url",
-  import: "default",
-});
+type Props = { dim: boolean; mode: "home" | "lock" };
 
-const wallpaperUrl = Object.entries(wallpapers).find(([path]) =>
-  path.normalize("NFC").includes("배경화면"),
-)?.[1];
-
-type Props = { dim: boolean };
-
-export default function Wallpaper({ dim }: Props) {
+export default function Wallpaper({ dim, mode }: Props) {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden bg-black">
-      {wallpaperUrl ? (
-        <img src={wallpaperUrl} alt="" draggable={false} className="h-full w-full object-cover" />
-      ) : null}
+      <img
+        src={mode === "lock" ? "/lock-wallpaper.jpg" : "/home-wallpaper.jpg"}
+        alt=""
+        draggable={false}
+        className="h-full w-full object-cover"
+      />
       <div
         className="absolute inset-0 transition-colors duration-700"
-        style={{ backgroundColor: dim ? "rgba(0, 0, 0, 0.35)" : "rgba(0, 0, 0, 0)" }}
+        style={{
+          backgroundColor: mode === "lock" || dim ? "rgba(0, 0, 0, 0.34)" : "rgba(0, 0, 0, 0.08)",
+        }}
       />
     </div>
   );

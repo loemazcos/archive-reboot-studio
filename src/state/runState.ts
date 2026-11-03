@@ -51,7 +51,7 @@ export const CLUE_FIRST_DM = "C01";
 export const CLUE_MEMO_APP = "C17";
 export const CLUE_REMIT = "C19";
 export const ENDING_A0 = "A-0";
-export type StoryEnding = "A" | "B1" | "B2" | "B3" | "D" | "C";
+export type StoryEnding = "A0" | "A" | "B1" | "B2" | "B3" | "D" | "C";
 export type EndingPartner = "donghyun" | "jaehyun" | "seongho" | "none";
 
 export type SanghyukState = {
@@ -178,7 +178,16 @@ export function parseRun(value: unknown): RunState | null {
     return null;
   }
   if (typeof candidate.battery !== "number" || !Array.isArray(candidate.clues)) return null;
-  return { ...DEFAULT_RUN, ...candidate, viewing: null };
+  return {
+    ...DEFAULT_RUN,
+    ...candidate,
+    consult: {
+      ...DEFAULT_CONSULT,
+      ...candidate.consult,
+      affinity: { ...DEFAULT_CONSULT.affinity, ...candidate.consult?.affinity },
+    },
+    viewing: null,
+  };
 }
 
 function makeNotice(
@@ -361,7 +370,7 @@ export function answerSanghyuk(run: RunState, choice: "why" | "read"): RunState 
     sanghyuk: { ...run.sanghyuk, choice, answeredAt: run.t },
   };
   if (choice === "why" && !next.codex.includes(ENDING_A0)) {
-    return { ...next, codex: [...next.codex, ENDING_A0] };
+    return { ...next, codex: [...next.codex, ENDING_A0], storyEnding: "A0" };
   }
   return next;
 }
