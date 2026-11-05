@@ -1,22 +1,22 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { ChevronDown, Heart, Pause, Play, Shuffle, SkipBack, SkipForward } from "lucide-react";
-import whoArt from "@/assets/spotify/who.jpg.asset.json";
-import howArt from "@/assets/spotify/how.jpg.asset.json";
-import nineteenArt from "@/assets/spotify/1999.jpg.asset.json";
+import whoArt from "@/assets/spotify/who.jpg";
+import howArt from "@/assets/spotify/how.jpg";
+import nineteenArt from "@/assets/spotify/1999.jpg";
 import why from "@/assets/spotify/why.jpg";
 
 // Album art lives only here — swap a URL to change a cover.
 export const PLAYLIST = [
-  { id: "t1", srcId: "1.2.8", title: "돌아버리겠다", album: "WHO!", art: whoArt.url, len: 196 },
-  { id: "t2", srcId: "1.2.8", title: "One and Only", album: "WHO!", art: whoArt.url, len: 196 },
+  { id: "t1", srcId: "1.2.8", title: "돌아버리겠다", album: "WHO!", art: whoArt, len: 196 },
+  { id: "t2", srcId: "1.2.8", title: "One and Only", album: "WHO!", art: whoArt, len: 196 },
   { id: "t3", srcId: "1.2.5", title: "뭣 같다", album: "WHY..", art: why, len: 181 },
-  { id: "t4", srcId: "1.3.9", title: "Nice Guy", album: "19.99", art: nineteenArt.url, len: 188 },
+  { id: "t4", srcId: "1.3.9", title: "Nice Guy", album: "19.99", art: nineteenArt, len: 188 },
   {
     id: "t5",
     srcId: "1.2.7",
     title: "So let's go see the stars",
     album: "HOW?",
-    art: howArt.url,
+    art: howArt,
     len: 192,
   },
 ];

@@ -58,13 +58,15 @@ export default function LockScreen({ now, onUnlock }: Props) {
         ) : null}
       </div>
 
-      <NotificationCenter
-        from="bottom"
-        progress={stackOpen ? 1 : 0}
-        dragging={false}
-        now={now}
-        onClose={() => setStackOpen(false)}
-      />
+      <div className="absolute inset-0 z-[60]">
+        <NotificationCenter
+          from="bottom"
+          progress={stackOpen ? 1 : 0}
+          dragging={false}
+          now={now}
+          onClose={() => setStackOpen(false)}
+        />
+      </div>
 
       <div className="mt-auto flex flex-col items-center gap-5 pb-[calc(env(safe-area-inset-bottom)+28px)]">
         {padOpen ? (

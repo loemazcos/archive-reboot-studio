@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { callFunction } from "@/lib/gameApi";
+import { clearSlot } from "@/lib/device";
 import { useGameState } from "@/state/GameState";
 import { setActivityStatus, setSoundOn } from "@/state/runState";
 
@@ -8,6 +9,7 @@ export default function SettingsApp() {
   const [aiStatus, setAiStatus] = useState<"checking" | "connected" | "missing" | "error">(
     "checking",
   );
+  const [resetConfirm, setResetConfirm] = useState(false);
   const on = run.activityStatus;
   const dark = run.appFlags["settings.theme"] === "dark";
 
@@ -134,6 +136,42 @@ export default function SettingsApp() {
                   : "상태 확인 실패"}
           </span>
         </div>
+      </div>
+      <div className="mt-4 rounded-[22px] bg-[var(--card)] p-4 text-[15px]">
+        {resetConfirm ? (
+          <div className="flex flex-col gap-3">
+            <p className="text-[14px] text-[var(--fg-2)]">
+              저장된 이름과 진행 상황을 지우고 처음부터 시작해요. 되돌릴 수 없어요.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setResetConfirm(false)}
+                className="flex-1 rounded-[12px] bg-[var(--key-pressed)] py-2.5 text-[14px] font-semibold"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearSlot();
+                  window.location.reload();
+                }}
+                className="flex-1 rounded-[12px] bg-[#FF3B30] py-2.5 text-[14px] font-semibold text-white"
+              >
+                지우고 다시 시작
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setResetConfirm(true)}
+            className="w-full text-left text-[15px] font-semibold text-[#FF3B30]"
+          >
+            처음부터 다시 시작
+          </button>
+        )}
       </div>
     </div>
   );

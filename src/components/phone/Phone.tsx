@@ -215,7 +215,10 @@ export default function Phone() {
     return () => window.clearInterval(id);
   }, [heartbeatOn, audible]);
 
-  const finishBootScreen = useCallback(() => update(finishBoot), [update]);
+  const finishBootScreen = useCallback(() => {
+    update(finishBoot);
+    setLocked(false);
+  }, [update]);
   const clearDayCut = useCallback(() => setCutDay(null), []);
   const finishTypingCut = useCallback(() => update(markNightCutPlayed), [update]);
   const stepActiveCall = useCallback(
@@ -450,7 +453,7 @@ export default function Phone() {
             <TypingCutBanner onDone={finishTypingCut} />
           ) : null}
 
-          {!locked && banner ? (
+          {banner ? (
             <NotificationBanner
               key={banner.id}
               appId={banner.appId}

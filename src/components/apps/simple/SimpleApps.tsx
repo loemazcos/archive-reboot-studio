@@ -784,22 +784,37 @@ export function PhotosApp() {
     return (
       <AppShell title="비공개 앨범" onBack={() => setView("list")}>
         {unlocked ? (
-          run.day >= hiddenVideo.day ? (
-            <button
-              type="button"
-              onClick={() => reveal(hiddenVideo)}
-              className="mt-2 w-full rounded-[18px] bg-[var(--card)] p-4 text-left"
-            >
-              <span className="flex aspect-video items-center justify-center rounded-[12px] bg-black/80 text-white">
-                <Play size={34} aria-hidden="true" />
-              </span>
-              <p className="mt-3 text-[15px] font-semibold">{hiddenVideo.title}</p>
-              <p className="text-[13px] text-[var(--fg-2)]">{hiddenVideo.views}</p>
-              <p className="mt-2 text-[14px]">{hiddenVideo.note}</p>
-            </button>
-          ) : (
-            <p className="mt-10 text-center text-[14px] text-[var(--fg-2)]">항목이 없어요</p>
-          )
+          <div className="mt-2 flex flex-col gap-3">
+            {cluePhotos.length === 0 && run.day < hiddenVideo.day ? (
+              <p className="mt-10 text-center text-[14px] text-[var(--fg-2)]">항목이 없어요</p>
+            ) : null}
+            {cluePhotos.map((clue) => (
+              <button
+                key={clue.id}
+                type="button"
+                onClick={() => reveal({ clue: clue.id })}
+                className="w-full rounded-[18px] bg-[var(--card)] p-4 text-left"
+              >
+                <p className="text-[15px] font-semibold">{clue.title}</p>
+                <p className="mt-1 text-[13px] text-[var(--fg-2)]">{clue.app} · 단서 {clue.id}</p>
+                <p className="mt-2 text-[14px]">{clue.text}</p>
+              </button>
+            ))}
+            {run.day >= hiddenVideo.day ? (
+              <button
+                type="button"
+                onClick={() => reveal(hiddenVideo)}
+                className="w-full rounded-[18px] bg-[var(--card)] p-4 text-left"
+              >
+                <span className="flex aspect-video items-center justify-center rounded-[12px] bg-black/80 text-white">
+                  <Play size={34} aria-hidden="true" />
+                </span>
+                <p className="mt-3 text-[15px] font-semibold">{hiddenVideo.title}</p>
+                <p className="text-[13px] text-[var(--fg-2)]">{hiddenVideo.views}</p>
+                <p className="mt-2 text-[14px]">{hiddenVideo.note}</p>
+              </button>
+            ) : null}
+          </div>
         ) : (
           <div className="mt-10 flex flex-col items-center gap-3">
             <Lock size={30} aria-hidden="true" />
