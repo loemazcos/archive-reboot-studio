@@ -58,7 +58,7 @@ export default function LockScreen({ now, onUnlock }: Props) {
         ) : null}
       </div>
 
-      <div className="absolute inset-0 z-[60]">
+      <div className={`absolute inset-0 z-[60] ${stackOpen ? "" : "pointer-events-none"}`}>
         <NotificationCenter
           from="bottom"
           progress={stackOpen ? 1 : 0}

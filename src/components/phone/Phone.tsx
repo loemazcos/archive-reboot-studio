@@ -549,7 +549,7 @@ export default function Phone() {
                 onClick={pressHome}
                 className="group absolute bottom-0 left-1/2 z-[61] flex h-[30px] w-[200px] -translate-x-1/2 items-end justify-center pb-2"
               >
-                <span className="h-[5px] w-[134px] rounded-full bg-[var(--fg)] transition-transform group-active:scale-x-90" />
+                <span className="h-[5px] w-[134px] rounded-full bg-white/80 transition-transform group-active:scale-x-90" />
               </button>
             </>
           )}
