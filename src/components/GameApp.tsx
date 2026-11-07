@@ -1,19 +1,12 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import Phone from "@/components/phone/Phone";
 import NameScreen from "@/components/NameScreen";
 import { usePhoneScale } from "@/hooks/usePhoneScale";
-import { getDeviceId, getPlayerName } from "@/lib/device";
 import { GameStateProvider } from "@/state/GameState";
 
 function App() {
   const scale = usePhoneScale();
-  const [name, setName] = useState<string | null | undefined>(undefined);
-
-  useEffect(() => {
-    setName(getDeviceId() ? getPlayerName() : null);
-  }, []);
-
-  if (name === undefined) return <div className="game-loading" />;
+  const [name, setName] = useState<string | null>(null);
   if (!name) return <NameScreen onReady={setName} />;
 
   return (

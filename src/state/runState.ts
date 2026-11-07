@@ -271,23 +271,22 @@ function normalize(run: RunState): RunState {
   return settleSocial(settleKakaoEvents(settleDoubles(settleCalls(next))));
 }
 
-function wakeUp(run: RunState, extraMinutes: number, shutdownNow: boolean): RunState {
+function wakeUp(run: RunState, extraMinutes: number): RunState {
   const wokeAt = run.nextWakeT;
   const sleepDebt = run.sleptAt === null || run.sleptAt >= dayStartOf(run) + DEBT_LINE;
   const restored = run.charging ? CHARGED_BATTERY : round1(run.battery - NO_CHARGE_PENALTY);
-  const shutdown = shutdownNow || restored <= 0;
   const day = run.day + 1;
   return normalize({
     ...run,
     day,
     nextWakeT: wokeAt + DAY_MIN,
     t: wokeAt + extraMinutes,
-    battery: shutdown ? RESTART_BATTERY : restored,
+    battery: Math.max(0, restored),
     charging: false,
     sleptAt: null,
     sleepDebt,
     skipLastRecess: sleepDebt,
-    booted: shutdown,
+    booted: false,
     notices: [...run.notices, ...onDayStart(day, wokeAt)],
     notificationsCleared: false,
     morning: { erasedThrice: run.erasedThrice, dndNight: run.dnd },
@@ -299,17 +298,19 @@ export function advanceRun(run: RunState, minutes: number, batteryCost: number):
   const wakeAt = run.nextWakeT;
   const charged: RunState = {
     ...run,
-    battery: round1(
-      run.battery -
-        (run.lowPower || run.battery <= LOW_POWER_LINE ? batteryCost * 0.6 : batteryCost),
+    battery: Math.max(
+      0,
+      round1(
+        run.battery -
+          (run.lowPower || run.battery <= LOW_POWER_LINE ? batteryCost * 0.6 : batteryCost),
+      ),
     ),
   };
   const withEvents = applyCrossings(
     charged,
     crossingsBetween(run, run.t, Math.min(target, wakeAt)),
   );
-  if (withEvents.battery <= 0) return wakeUp({ ...withEvents, t: wakeAt }, 0, true);
-  if (target >= wakeAt) return wakeUp({ ...withEvents, t: wakeAt }, target - wakeAt, false);
+  if (target >= wakeAt) return wakeUp({ ...withEvents, t: wakeAt }, target - wakeAt);
   return normalize({ ...withEvents, t: target });
 }
 
