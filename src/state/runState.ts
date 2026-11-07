@@ -37,7 +37,6 @@ import {
   LOW_POWER_LINE,
   NO_CHARGE_PENALTY,
   REMIT_EXPIRES_T,
-  RESTART_BATTERY,
   START_T,
   clockOf,
   crossingsBetween,
